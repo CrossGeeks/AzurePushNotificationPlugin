@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.0</TargetFramework>
+    <AssemblyName>Plugin.AzurePushNotification</AssemblyName>
+    <RootNamespace>Plugin.AzurePushNotification</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netstandard1.0\Plugin.AzurePushNotification.xml</DocumentationFile>
+    <DebugType>none</DebugType>
+    <DebugSymbols>False</DebugSymbols>
+  </PropertyGroup>
+
+  <Import Project="..\Plugin.AzurePushNotification.Shared\Plugin.AzurePushNotification.Shared.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\Plugin.AzurePushNotification.Abstractions\Plugin.AzurePushNotification.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>
