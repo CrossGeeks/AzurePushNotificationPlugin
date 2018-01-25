@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Plugin.AzurePushNotification.Abstractions
 {
@@ -74,27 +75,15 @@ namespace Plugin.AzurePushNotification.Abstractions
         /// <summary>
         /// Get all subscribed tags
         /// </summary>
-        string[] Subscribedtags { get; }
+        string[] Tags { get; }
         /// <summary>
         /// Subscribe to multiple tags
         /// </summary>
-        void Register(string[] tags);
-        /// <summary>
-        /// Subscribe to one tag
-        /// </summary>
-        void Register(string tag);
-        /// <summary>
-        /// Unsubscribe to one tag
-        /// </summary>
-        void Unregister(string tag);
-        /// <summary>
-        /// Unsubscribe to multiple tags
-        /// </summary>
-        void Unregister(string[] tags);
+        Task RegisterAsync(string[] tags);
         /// <summary>
         /// Unsubscribe all tags
         /// </summary>
-        void UnregisterAll();
+        Task UnregisterAsync();
         /// <summary>
         /// Notification handler to receive, customize notification feedback and provide user actions
         /// </summary>
@@ -113,6 +102,10 @@ namespace Plugin.AzurePushNotification.Abstractions
         /// </summary>
         event AzurePushNotificationDataEventHandler OnNotificationReceived;
         /// <summary>
+        /// Event triggered when a notification is deleted (Android Only)
+        /// </summary>
+        event AzurePushNotificationDataEventHandler OnNotificationDeleted;
+        /// <summary>
         /// Event triggered when there's an error
         /// </summary>
         event AzurePushNotificationErrorEventHandler OnNotificationError;
@@ -120,5 +113,9 @@ namespace Plugin.AzurePushNotification.Abstractions
         /// Push notification token
         /// </summary>
         string Token { get; }
+        /// <summary>
+        /// Indicates if is registered in notification hub
+        /// </summary>
+        bool IsRegistered { get; }
     }
 }
