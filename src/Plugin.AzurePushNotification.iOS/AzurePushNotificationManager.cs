@@ -19,6 +19,7 @@ namespace Plugin.AzurePushNotification
       
         static NSString TagsKey = new NSString("Tags");
         static NSString TokenKey = new NSString("Token");
+        static NSString EnabledKey = new NSString("Enabled");
         NSString RegisteredKey = new NSString("Registered");
 
         static NSMutableArray _tags = (NSUserDefaults.StandardUserDefaults.ValueForKey(TagsKey) as NSArray ?? new NSArray()).MutableCopy() as NSMutableArray;
@@ -26,13 +27,16 @@ namespace Plugin.AzurePushNotification
         {
             get
             {
-
                 //Load all subscribed topics
                 IList<string> topics = new List<string>();
-                for (nuint i = 0; i < _tags.Count; i++)
+                if(_tags!=null)
                 {
-                    topics.Add(_tags.GetItem<NSString>(i));
+                    for (nuint i = 0; i < _tags.Count; i++)
+                    {
+                        topics.Add(_tags.GetItem<NSString>(i));
+                    }
                 }
+               
                 return topics.ToArray();
             }
 
@@ -55,6 +59,9 @@ namespace Plugin.AzurePushNotification
         }
 
         public bool IsRegistered { get { return NSUserDefaults.StandardUserDefaults.BoolForKey(RegisteredKey); } }
+
+        public bool IsEnabled { get { return NSUserDefaults.StandardUserDefaults.BoolForKey(EnabledKey); } }
+
 
         static SBNotificationHub Hub { get; set; }
   
@@ -311,7 +318,7 @@ namespace Plugin.AzurePushNotification
                         System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Registered - ${tags}");
 
                         NSUserDefaults.StandardUserDefaults.SetBool(true, RegisteredKey);
-                        NSUserDefaults.StandardUserDefaults.SetValueForKey(_tags, TagsKey);
+                        NSUserDefaults.StandardUserDefaults.SetValueForKey(_tags?? new NSArray().MutableCopy(), TagsKey);
                         NSUserDefaults.StandardUserDefaults.Synchronize();
                     }
                 }
@@ -393,6 +400,9 @@ namespace Plugin.AzurePushNotification
         {
             InternalToken = deviceToken;
 
+            NSUserDefaults.StandardUserDefaults.SetBool(true, EnabledKey);
+            NSUserDefaults.StandardUserDefaults.Synchronize();
+
             _onTokenRefresh?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationTokenEventArgs(CrossAzurePushNotification.Current.Token));
 
             await CrossAzurePushNotification.Current.RegisterAsync(CrossAzurePushNotification.Current.Tags);
@@ -410,6 +420,9 @@ namespace Plugin.AzurePushNotification
 
         public static void RemoteNotificationRegistrationFailed(NSError error)
         {
+            NSUserDefaults.StandardUserDefaults.SetBool(false, EnabledKey);
+            NSUserDefaults.StandardUserDefaults.Synchronize();
+
             _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(error.Description));
         }
 
