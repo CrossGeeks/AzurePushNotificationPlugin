@@ -178,6 +178,26 @@ Also should override these methods and make the following calls:
 ## Using Push Notification APIs
 It is drop dead simple to gain access to the PushNotification APIs in any project. All you need to do is get a reference to the current instance of IPushNotification via `CrossPushNotification.Current`:
 
+Register tags
+
+```csharp
+   /// <summary>
+   /// Registers tags in Azure Notification hub
+   /// </summary>
+    await CrossAzurePushNotification.Current.RegisterAsync(new string[]{"crossgeeks","general"});
+```
+
+Note: The method above cleans all previous registered tags when called. So it kind of replaces the tags each time you call it.
+
+Unregister tags
+
+```csharp
+   /// <summary>
+   /// Unregister all tags in Azure Notification hub
+   /// </summary>
+    await CrossAzurePushNotification.Current.UnregisterAsync();
+```
+
 ### Events
 
 Once token is registered/refreshed you will get it on **OnTokenRefresh** event.
@@ -189,6 +209,8 @@ Once token is registered/refreshed you will get it on **OnTokenRefresh** event.
    /// </summary>
     event AzurePushNotificationTokenEventHandler OnTokenRefresh;
 ```
+
+Note: Don't call **RegisterAsync** in the above event because it is called automatically each time the token changes
 
 ```csharp        
   /// <summary>
