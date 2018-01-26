@@ -154,20 +154,6 @@ CrossAzurePushNotification.Current.OnNotificationOpened += (s,p) =>
  };
 ```
 
-
-**OnNotificationDeleted** (Android Only)
-```csharp
-
-  CrossAzurePushNotification.Current.OnNotificationDeleted += (s,p) =>
-  {
- 
-        System.Diagnostics.Debug.WriteLine("Deleted");
-    
-  };
-
-```
-
-
 On Android should use **click_action** key inside the data payload when sending notification with categories. The value for this key will be the category.
 
 Android Notification Sample Payload:
