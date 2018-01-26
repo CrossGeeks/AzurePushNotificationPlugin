@@ -15,9 +15,16 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Plugin.AzurePushNotificatio
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B2C5EB1D-AC6D-41FC-A243-7958BB94A528}"
 	ProjectSection(SolutionItems) = preProject
+		docs\AndroidCustomization.md = docs\AndroidCustomization.md
+		docs\FAQ.md = docs\FAQ.md
+		docs\GettingStarted.md = docs\GettingStarted.md
+		docs\iOSCustomization.md = docs\iOSCustomization.md
 		LICENSE = LICENSE
+		docs\LocalizedPushNotifications.md = docs\LocalizedPushNotifications.md
+		docs\NotificationActions.md = docs\NotificationActions.md
 		nuget\Plugin.nuspec = nuget\Plugin.nuspec
 		README.md = README.md
+		docs\ReceivingNotifications.md = docs\ReceivingNotifications.md
 	EndProjectSection
 EndProject
 Global

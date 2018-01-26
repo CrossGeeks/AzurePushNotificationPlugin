@@ -261,12 +261,12 @@ namespace Plugin.AzurePushNotification
         {
             if (Hub == null)
                 return;
-
-
+           
+            _tags = NSArray.FromStrings(tags).MutableCopy() as NSMutableArray;
 
             await Task.Run(() =>
             {
-                if (Token != null && Token.Length > 0)
+                if (!string.IsNullOrEmpty(Token))
                 {
                     NSError errorFirst;
 
