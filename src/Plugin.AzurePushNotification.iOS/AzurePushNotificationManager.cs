@@ -137,6 +137,7 @@ namespace Plugin.AzurePushNotification
         }
         public static async Task Initialize(string notificationHubConnectionString, string notificationHubPath, NSDictionary options)
         {
+           
             Hub = new SBNotificationHub(notificationHubConnectionString, notificationHubPath);
 
             CrossAzurePushNotification.Current.NotificationHandler = CrossAzurePushNotification.Current.NotificationHandler ?? new DefaultPushNotificationHandler();
@@ -273,7 +274,7 @@ namespace Plugin.AzurePushNotification
 
                     if (errorFirst != null)
                     {
-                        _onNotificationError.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(errorFirst.Description));
+                        _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(errorFirst.Description));
                         System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Unregister- Error - {errorFirst.Description}");
 
                         return;
@@ -282,12 +283,12 @@ namespace Plugin.AzurePushNotification
                     NSSet tagSet = new NSSet(tags);
                     NSError error;
 
-                    Hub.RegisterNative(Token, tagSet, out error);
+                    Hub.RegisterNative(Token, tagSet.Count >0?tagSet:null, out error);
 
                     if (error != null)
                     {
                         System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Register- Error - {error.Description}");
-                        _onNotificationError.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(error.Description));
+                        _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(error.Description));
 
                     }
                     else
@@ -317,7 +318,7 @@ namespace Plugin.AzurePushNotification
 
                     if (error != null)
                     {
-                        _onNotificationError.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(error.Description));
+                        _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(error.Description));
                         System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Unregister- Error - {error.Description}");
                     }
                     else
@@ -329,7 +330,7 @@ namespace Plugin.AzurePushNotification
                 }
                 catch (Exception ex)
                 {
-                    _onNotificationError.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(ex.Message));
+                    _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(ex.Message));
                     System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Unregister- Error - {ex.Message}");
                 }
 
@@ -371,7 +372,7 @@ namespace Plugin.AzurePushNotification
             completionHandler();
         }
 
-        public static void DidRegisterRemoteNotifications(NSData deviceToken)
+        public static async void DidRegisterRemoteNotifications(NSData deviceToken)
         {
             string trimmedDeviceToken = deviceToken.Description;
             if (!string.IsNullOrWhiteSpace(trimmedDeviceToken))
@@ -383,9 +384,9 @@ namespace Plugin.AzurePushNotification
             }
 
             NSUserDefaults.StandardUserDefaults.SetString(trimmedDeviceToken,TokenKey);
-
-            CrossAzurePushNotification.Current.RegisterAsync(CrossAzurePushNotification.Current.Tags);
             _onTokenRefresh?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationTokenEventArgs(trimmedDeviceToken));
+
+            await CrossAzurePushNotification.Current.RegisterAsync(CrossAzurePushNotification.Current.Tags);
         }
 
         public static void DidReceiveMessage(NSDictionary data)

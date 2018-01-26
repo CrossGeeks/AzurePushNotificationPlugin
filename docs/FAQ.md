@@ -19,15 +19,13 @@
 
 4. On some phones android background services might be blocked by some application. This is the case of <b>ASUS Zenfone 3</b> that has an  <b>Auto-start manager</b>, which disables background services by default. You need to make sure that your push notification service is not being blocked by some application like this one, since you won't receive push notifications when app is closed if so.
 
-5. Must compile against 24+ as plugin is using API 24 specific things. Here is a great breakdown: http://redth.codes/such-android-api-levels-much-confuse-wow/ (Android project must be compiled using 7.0+ target framework)
+5. Must compile against 26+ as plugin is using API 26 specific things. Here is a great breakdown: http://redth.codes/such-android-api-levels-much-confuse-wow/ (Android project must be compiled using 8.0+ target framework)
 
 6. The package name of your Android aplication must <b>start with lower case</b> or you will get the build error: <b><code>Installation error: INSTALL_PARSE_FAILED_MANIFEST_MALFORMED</code> </b>
 
 7. Make sure you have updated your Android SDK Manager libraries:
 
 ![image](https://cloud.githubusercontent.com/assets/2547751/6440604/1b0afb64-c0b5-11e4-93b8-c496e2bfa588.png)
-
-8. Topics are <b>case sensitive</b> so "test" and "Test" are different topics.
 
 9. <b> Error 1589 NotificationService Not posting notification without small icon </b><br>
 	It happen when the message is received, but the notification isn't displayed. If you got this error, it mean you need to tell which one is your app icon on <b>Android Project Properties > Android Manifest > application Icon</b> or in the <b>AndroidManifext.xml file and put android:icon="@drawable/{replace with your icon file name}"</b> in the

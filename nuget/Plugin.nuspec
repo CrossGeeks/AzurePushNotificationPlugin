@@ -2,10 +2,10 @@
 <package >
   <metadata minClientVersion="2.8.1">
     <id>Plugin.AzurePushNotification</id>
-    <version>0.0.1</version>
+    <version>0.0.7-beta</version>
     <title>Azure Push Notification Plugin for Xamarin</title>
-    <authors>Rendy Del Rosario, Felipe Gavilan</authors>
-    <owners>crossgeeks</owners>
+    <authors>Rendy Del Rosario</authors>
+    <owners>crossgeeks,rdelrosario</owners>
     <licenseUrl>https://raw.githubusercontent.com/CrossGeeks/AzurePushNotificationPlugin/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/CrossGeeks/AzurePushNotificationPlugin</projectUrl>
     <iconUrl>https://github.com/CrossGeeks/AzurePushNotificationPlugin/blob/master/art/icon.png?raw=true</iconUrl>
@@ -16,9 +16,11 @@
     <copyright>Copyright 2017</copyright>
     <tags>iOS,Android,azure,notifications hub,push notifications,pcl,xamarin,plugins,xam.pcl,fcm,apn</tags>
     <dependencies>
-        <group targetFramework="MonoAndroid70">
-            <dependency id="Xamarin.GooglePlayServices.Base" version="42.1021.1" />
-            <dependency id="Xamarin.Firebase.Messaging" version="42.1021.1" />
+         <group targetFramework="netstandard1.0">
+           <dependency id="NETStandard.Library" version="1.6.1" />
+         </group>
+        <group targetFramework="MonoAndroid80">
+            <dependency id="Xamarin.Firebase.Messaging" version="[60.1142.0]" />
             <dependency id="Xamarin.Azure.NotificationHubs.Android" version="0.4.0" />
         </group>
         <group targetFramework="Xamarin.iOS10">
@@ -28,9 +30,9 @@
   </metadata>
   <files>
         <!--NetStandard/PCL-->
-        <file src="..\src\Plugin.PushNotification\bin\Release\netstandard1.0\Plugin.AzurePushNotification.*" target="lib\netstandard1.0" />
-        <file src="..\src\Plugin.PushNotification.Android\bin\Release\Plugin.AzurePushNotification.*" target="lib\MonoAndroid10" />
-        <file src="..\src\Plugin.PushNotification.iOS\bin\iPhone\Release\Plugin.AzurePushNotification.*" target="lib\Xamarin.iOS10" />
+        <file src="..\src\Plugin.AzurePushNotification\bin\Release\netstandard1.0\Plugin.AzurePushNotification.*" target="lib\netstandard1.0" />
+        <file src="..\src\Plugin.AzurePushNotification.Android\bin\Release\Plugin.AzurePushNotification.*" target="lib\MonoAndroid80" />
+        <file src="..\src\Plugin.AzurePushNotification.iOS\bin\iPhone\Release\Plugin.AzurePushNotification.*" target="lib\Xamarin.iOS10" />
   </files>
 </package>
 

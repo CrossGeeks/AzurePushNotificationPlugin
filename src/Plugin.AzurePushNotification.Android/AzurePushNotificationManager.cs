@@ -89,6 +89,9 @@ namespace Plugin.AzurePushNotification
 
         public static void Initialize(Context context, string notificationHubConnectionString, string notificationHubPath, bool resetToken, bool createDefaultNotificationChannel = true)
         {
+
+            //Firebase.FirebaseApp.InitializeApp(Android.App.Application.Context);
+
             Hub = new NotificationHub(notificationHubPath, notificationHubConnectionString, Android.App.Application.Context);
 
             _context = context;
@@ -314,12 +317,13 @@ namespace Plugin.AzurePushNotification
                         {
                             System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Unregister- Error - {ex.Message}");
 
-                            _onNotificationError.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(ex.Message));
+                            _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(ex.Message));
                         }
 
                         try
                         {
-                            var hubRegistration = Hub.Register(Token, _tags?.ToArray());
+                            var tArray = _tags?.ToArray();
+                            var hubRegistration = Hub.Register(Token, (tArray?.Length??0) > 0? tArray: null );
 
                             var editor = Application.Context.GetSharedPreferences(KeyGroupName, FileCreationMode.Private).Edit();
                             editor.PutBoolean(RegisteredKey, true);
@@ -330,7 +334,7 @@ namespace Plugin.AzurePushNotification
                         catch (Exception ex)
                         {
                             System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Register - Error - {ex.Message}");
-                            _onNotificationError.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(ex.Message));
+                            _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(ex.Message));
                         }
                     }
 
@@ -359,7 +363,7 @@ namespace Plugin.AzurePushNotification
                     {
                         System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Error - {ex.Message}");
 
-                        _onNotificationError.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(ex.Message));
+                        _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(ex.Message));
                     }
                 }
             });

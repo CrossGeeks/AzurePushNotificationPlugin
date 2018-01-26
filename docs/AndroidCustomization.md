@@ -1,26 +1,26 @@
 ## Android Specific Customization
 
-You can set the activity to be launched when you tap on the notification on Android project by setting **PushNotificationManager.NotificationActivityType**
+You can set the activity to be launched when you tap on the notification on Android project by setting **AzurePushNotificationManager.NotificationActivityType**
 
 Usage sample:
 
 ```csharp
-PushNotificationManager.NotificationActivityType = typeof(MainActivity);
+AzurePushNotificationManager.NotificationActivityType = typeof(MainActivity);
 ```
 
 **Note: Uses application main launcher activity if the above is not set.**
 
-You can also set the flags for launching this activity with **PushNotificationManager.NotificationActivityFlags** by default is set to:
+You can also set the flags for launching this activity with **AzurePushNotificationManager.NotificationActivityFlags** by default is set to:
 
 ```csharp
-PushNotificationManager.NotificationActivityFlags = ActivityFlags.ClearTop | ActivityFlags.SingleTop
+AzurePushNotificationManager.NotificationActivityFlags = ActivityFlags.ClearTop | ActivityFlags.SingleTop
 ```
 
 ### Static customization properties
 
 If plugin is not initialized with a push handler on Android by default the plugin uses the default push notification handler to create the notification ui & actions support when sending **Data messages**.
 
-By using the default push notification handler. There are a few things you can configure in Android project using the following static properties of **PushNotificationManager** class:
+By using the default push notification handler. There are a few things you can configure in Android project using the following static properties of **AzurePushNotificationManager** class:
 
 ```csharp
 
@@ -39,11 +39,17 @@ By using the default push notification handler. There are a few things you can c
 	//Sets the color will be used for the notification
     public static Color? Color { get; set; }
 
+	//Sets the default notification channel id for Android O
+	public static string DefaultNotificationChannelId { get; set; } = "PushNotificationChannel";
+    
+	//Sets the default notification channel name for Android O
+    public static string DefaultNotificationChannelName { get; set; } = "General";
+
 ```
 
-If **PushNotificationManager.IconResource** not set will use default application icon.
+If **AzurePushNotificationManager.IconResource** not set will use default application icon.
 
-If **PushNotificationManager.SoundUri** not set will use the default notification ringtone.
+If **AzurePushNotificationManager.SoundUri** not set will use the default notification ringtone.
    
 If **NotificationContentTitleKey** not set will look for **title** key value in the notification payload to set the title. If no title key present will use the application name as the notification title.
 
@@ -70,7 +76,7 @@ There are also some keys you can set on the payload:
 * **icon** : Sets the notification icon
 * **click_action** : Sets name for the notification action
 
-If **sound** or **icon** keys present have priority over the **PushNotificationManager.SoundUri** and **PushNotificationManager.IconResource** static customization properties mentioned above.
+If **sound** or **icon** keys present have priority over the **AzurePushNotificationManager.SoundUri** and **AzurePushNotificationManager.IconResource** static customization properties mentioned above.
 
 #####  Notification Id
 
@@ -173,7 +179,7 @@ Payload sample with sound
   }
 }
 ```
-If sound not set will set the **PushNotificationManager.SoundUri** value if not set either will use the default notification ringtone.
+If sound not set will set the **AzurePushNotificationManager.SoundUri** value if not set either will use the default notification ringtone.
 
 #####  Notification Icon
 
@@ -206,7 +212,7 @@ Payload sample with icon and sound
 }
 ```
 
-If icon not set will set the **PushNotificationManager.IconResource** value if not set either will use the default application icon.
+If icon not set will set the **AzurePushNotificationManager.IconResource** value if not set either will use the default application icon.
 
 
 #####  Notification Actions

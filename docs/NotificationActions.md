@@ -84,7 +84,7 @@ Android on **Application** class **OnCreate** method:
 
 ```csharp
 #if DEBUG
-  PushNotificationManager.Initialize(this,
+  AzurePushNotificationManager.Initialize(this,
                 new NotificationUserCategory[]
                 {
                     new NotificationUserCategory("message",new List<NotificationUserAction> {
@@ -98,7 +98,7 @@ Android on **Application** class **OnCreate** method:
                     })
                 }, true);
 #else
-  PushNotificationManager.Initialize(this,
+  AzurePushNotificationManager.Initialize(this,
                 new NotificationUserCategory[]
                 {
                     new NotificationUserCategory("message",new List<NotificationUserAction> {
@@ -119,7 +119,7 @@ iOS on **AppDelegate** FinishLaunching:
 
 ```csharp
 
-  PushNotificationManager.Initialize(options, new NotificationUserCategory[]
+  AzurePushNotificationManager.Initialize(options, new NotificationUserCategory[]
   {
                 new NotificationUserCategory("message",new List<NotificationUserAction> {
                     new NotificationUserAction("Reply","Reply",NotificationActionType.Foreground)
@@ -136,7 +136,7 @@ iOS on **AppDelegate** FinishLaunching:
 You will get the identifier of the action that was tapped on **OnNotificationOpened** event:
 
 ```csharp
-CrossPushNotification.Current.OnNotificationOpened += (s,p) =>
+CrossAzurePushNotification.Current.OnNotificationOpened += (s,p) =>
 {
                 System.Diagnostics.Debug.WriteLine("Opened");
               
@@ -154,6 +154,20 @@ CrossPushNotification.Current.OnNotificationOpened += (s,p) =>
  };
 ```
 
+
+**OnNotificationDeleted** (Android Only)
+```csharp
+
+  CrossAzurePushNotification.Current.OnNotificationDeleted += (s,p) =>
+  {
+ 
+        System.Diagnostics.Debug.WriteLine("Deleted");
+    
+  };
+
+```
+
+
 On Android should use **click_action** key inside the data payload when sending notification with categories. The value for this key will be the category.
 
 Android Notification Sample Payload:
@@ -163,9 +177,7 @@ Android Notification Sample Payload:
         "body" : "hello!",
         "title": "push",
         "click_action":"message"
-     },
-     
-     "priority": "high"
+     }
 }
 ```
 

@@ -19,7 +19,7 @@ Valid extensions are: aiff, wav, or caf file
 ```
 #### Notification on Foreground
 
-You can set UNNotificationPresentationOptions to get an alert, badge, sound when notification is received in foreground by setting static property **PushNotificationManager.CurrentNotificationPresentationOption**. By default is set to UNNotificationPresentationOptions.None.
+You can set UNNotificationPresentationOptions to get an alert, badge, sound when notification is received in foreground by setting static property **AzurePushNotificationManager.CurrentNotificationPresentationOption**. By default is set to UNNotificationPresentationOptions.None.
 
 ```csharp
      public enum UNNotificationPresentationOptions
@@ -35,10 +35,10 @@ Usage sample on iOS Project:
 
 ```csharp
    //To set for alert
-   PushNotificationManager.CurrentNotificationPresentationOption = UNNotificationPresentationOptions.Alert;
+   AzurePushNotificationManager.CurrentNotificationPresentationOption = UNNotificationPresentationOptions.Alert;
 
    //You can also combine them
-   PushNotificationManager.CurrentNotificationPresentationOption = UNNotificationPresentationOptions.Alert | UNNotificationPresentationOptions.Badge;
+   AzurePushNotificationManager.CurrentNotificationPresentationOption = UNNotificationPresentationOptions.Alert | UNNotificationPresentationOptions.Badge;
 ```
 
 A good place to do this would be on the **OnReceived** method of a custom push notification handler if it changes depending on the notification, if not you can just set it once on the AppDelegate **FinishLaunching**.

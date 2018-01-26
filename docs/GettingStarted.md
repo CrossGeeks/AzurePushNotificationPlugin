@@ -29,19 +29,19 @@ Add google-services.json to Android project. Make sure build action is GoogleSer
 
 ![ADD JSON](https://github.com/CrossGeeks/FirebasePushNotificationPlugin/blob/master/images/android-googleservices-json.png?raw=true)
 
-Must compile against 24+ as plugin is using API 24 specific things. Here is a great breakdown: http://redth.codes/such-android-api-levels-much-confuse-wow/ (Android project must be compiled using 7.0+ target framework)
+Must compile against 26+ as plugin is using API 26 specific things. Here is a great breakdown: http://redth.codes/such-android-api-levels-much-confuse-wow/ (Android project must be compiled using 8.0+ target framework)
 
 ### Android Initialization
 
-You should initialize the plugin on an Android Application class if you don't have one on your project, should create an application class. Then call **PushNotificationManager.Initialize** method on OnCreate.
+You should initialize the plugin on an Android Application class if you don't have one on your project, should create an application class. Then call **AzurePushNotificationManager.Initialize** method on OnCreate.
 
-There are 3 overrides to **PushNotificationManager.Initialize**:
+There are 3 overrides to **AzurePushNotificationManager.Initialize**:
 
-- **PushNotificationManager.Initialize(Context context, bool resetToken)** : Default method to initialize plugin without supporting any user notification categories. Uses a DefaultPushHandler to provide the ui for the notification.
+- **AzurePushNotificationManager.Initialize(Context context, bool resetToken)** : Default method to initialize plugin without supporting any user notification categories. Uses a DefaultPushHandler to provide the ui for the notification.
 
-- **PushNotificationManager.Initialize(Context context, NotificationUserCategory[] categories, bool resetToken)**  : Initializes plugin using user notification categories. Uses a DefaultPushHandler to provide the ui for the notification supporting buttons based on the action_click send on the notification
+- **AzurePushNotificationManager.Initialize(Context context, NotificationUserCategory[] categories, bool resetToken)**  : Initializes plugin using user notification categories. Uses a DefaultPushHandler to provide the ui for the notification supporting buttons based on the action_click send on the notification
 
-- **PushNotificationManager.Initialize(Context context,IPushNotificationHandler pushHandler, bool resetToken)** : Initializes the plugin using a custom push notification handler to provide custom ui and behaviour notifications receipt and opening.
+- **AzurePushNotificationManager.Initialize(Context context,IPushNotificationHandler pushHandler, bool resetToken)** : Initializes the plugin using a custom push notification handler to provide custom ui and behaviour notifications receipt and opening.
 
 **Important: While debugging set resetToken parameter to true.**
 
@@ -62,9 +62,9 @@ Example of initialization:
             
             //If debug you should reset the token each time.
             #if DEBUG
-              PushNotificationManager.Initialize(this,true);
+              AzurePushNotificationManager.Initialize(this,true);
             #else
-              PushNotificationManager.Initialize(this,false);
+              AzurePushNotificationManager.Initialize(this,false);
             #endif
 
               //Handle notification when app is closed here
@@ -73,14 +73,24 @@ Example of initialization:
 
 
               };
+
+			//Set the default notification channel for your app when running Android Oreo
+            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
+            {
+                //Change for your default notification channel id here
+                AzurePushNotificationManager.DefaultNotificationChannelId = "DefaultChannel";
+
+                //Change for your default notification channel name here
+                AzurePushNotificationManager.DefaultNotificationChannelName = "General";
+            }
          }
     }
 
 ```
 
-By default the plugin launches the main launcher activity when you tap at a notification, but you can change this behaviour by setting the type of the activity you want to be launch on *PushNotificationManager.NotificationActivityType**
+By default the plugin launches the main launcher activity when you tap at a notification, but you can change this behaviour by setting the type of the activity you want to be launch on *AzurePushNotificationManager.NotificationActivityType**
 
-If you set **PushNotificationManager.NotificationActivityType** then put the following call on the **OnCreate** of activity of the type set. If not set then put it on your main launcher activity **OnCreate** method (On the Activity you got MainLauncher= true set)
+If you set **AzurePushNotificationManager.NotificationActivityType** then put the following call on the **OnCreate** of activity of the type set. If not set then put it on your main launcher activity **OnCreate** method (On the Activity you got MainLauncher= true set)
 
 ```csharp
         protected override void OnCreate(Bundle bundle)
@@ -89,7 +99,7 @@ If you set **PushNotificationManager.NotificationActivityType** then put the fol
 
 			//Other initialization stuff
 
-            PushNotificationManager.ProcessIntent(Intent);
+            AzurePushNotificationManager.ProcessIntent(Intent);
         }
 
  ```
@@ -98,19 +108,19 @@ If you set **PushNotificationManager.NotificationActivityType** then put the fol
 
 By default the plugin launches the activity when you tap at a notification with activity flags: **ActivityFlags.ClearTop | ActivityFlags.SingleTop**.
 
-You can change this behaviour by setting **PushNotificationManager.NotificationActivityFlags**. 
+You can change this behaviour by setting **AzurePushNotificationManager.NotificationActivityFlags**. 
  
-If you set **PushNotificationManager.NotificationActivityFlags** to ActivityFlags.SingleTop  or using default plugin behaviour then make this call on **OnNewIntent** method of the same activity on the previous step.
+If you set **AzurePushNotificationManager.NotificationActivityFlags** to ActivityFlags.SingleTop  or using default plugin behaviour then make this call on **OnNewIntent** method of the same activity on the previous step.
        
  ```csharp
 	    protected override void OnNewIntent(Intent intent)
         {
             base.OnNewIntent(intent);
-            PushNotificationManager.ProcessIntent(intent);
+            AzurePushNotificationManager.ProcessIntent(intent);
         }
  ```
 
- More information on **PushNotificationManager.NotificationActivityType** and **PushNotificationManager.NotificationActivityFlags** and other android customizations here:
+ More information on **AzurePushNotificationManager.NotificationActivityType** and **AzurePushNotificationManager.NotificationActivityFlags** and other android customizations here:
 
  [Android Customization](../docs/AndroidCustomization.md)
 
@@ -124,19 +134,19 @@ On Info.plist enable remote notification background mode
 
 ### iOS Initialization
 
-There are 3 overrides to **PushNotificationManager.Initialize**:
+There are 3 overrides to **AzurePushNotificationManager.Initialize**:
 
-- **PushNotificationManager.Initialize(NSDictionary options,bool autoRegistration)** : Default method to initialize plugin without supporting any user notification categories. Auto registers for push notifications if second parameter is true.
+- **AzurePushNotificationManager.Initialize(NSDictionary options,bool autoRegistration)** : Default method to initialize plugin without supporting any user notification categories. Auto registers for push notifications if second parameter is true.
 
-- **PushNotificationManager.Initialize(NSDictionary options, NotificationUserCategory[] categories)**  : Initializes plugin using user notification categories to support iOS notification actions.
+- **AzurePushNotificationManager.Initialize(NSDictionary options, NotificationUserCategory[] categories)**  : Initializes plugin using user notification categories to support iOS notification actions.
 
-- **PushNotificationManager.Initialize(NSDictionary options,IPushNotificationHandler pushHandler)** : Initializes the plugin using a custom push notification handler to provide native feedback of notifications event on the native platform.
+- **AzurePushNotificationManager.Initialize(NSDictionary options,IPushNotificationHandler pushHandler)** : Initializes the plugin using a custom push notification handler to provide native feedback of notifications event on the native platform.
 
 
-Call  **PushNotificationManager.Initialize** on AppDelegate FinishedLaunching
+Call  **AzurePushNotificationManager.Initialize** on AppDelegate FinishedLaunching
 ```csharp
 
-PushNotificationManager.Initialize(options,true);
+AzurePushNotificationManager.Initialize(options,true);
 
 ```
  **Note: When using Xamarin Forms do it just after LoadApplication call.**
@@ -145,12 +155,12 @@ Also should override these methods and make the following calls:
 ```csharp
         public override void RegisteredForRemoteNotifications(UIApplication application, NSData deviceToken)
         {
-             PushNotificationManager.DidRegisterRemoteNotifications(deviceToken);
+             AzurePushNotificationManager.DidRegisterRemoteNotifications(deviceToken);
         }
 
         public override void FailedToRegisterForRemoteNotifications(UIApplication application, NSError error)
         {
-            PushNotificationManager.RemoteNotificationRegistrationFailed(error);
+            AzurePushNotificationManager.RemoteNotificationRegistrationFailed(error);
 
         }
         // To receive notifications in foregroung on iOS 9 and below.
@@ -158,7 +168,7 @@ Also should override these methods and make the following calls:
         public override void DidReceiveRemoteNotification(UIApplication application, NSDictionary userInfo, Action<UIBackgroundFetchResult> completionHandler)
         {
             
-            PushNotificationManager.DidReceiveMessage(userInfo);
+            AzurePushNotificationManager.DidReceiveMessage(userInfo);
         }
 
       
@@ -177,14 +187,14 @@ Once token is registered/refreshed you will get it on **OnTokenRefresh** event.
    /// <summary>
    /// Event triggered when token is refreshed
    /// </summary>
-    event PushNotificationTokenEventHandler OnTokenRefresh;
+    event AzurePushNotificationTokenEventHandler OnTokenRefresh;
 ```
 
 ```csharp        
   /// <summary>
   /// Event triggered when a notification is received
   /// </summary>
-  event PushNotificationResponseEventHandler OnNotificationReceived;
+  event AzurePushNotificationResponseEventHandler OnNotificationReceived;
 ```
 
 
@@ -192,20 +202,27 @@ Once token is registered/refreshed you will get it on **OnTokenRefresh** event.
   /// <summary>
   /// Event triggered when a notification is opened
   /// </summary>
-  event PushNotificationResponseEventHandler OnNotificationOpened;
+  event AzurePushNotificationResponseEventHandler OnNotificationOpened;
+```
+
+```csharp 
+   /// <summary>
+   /// Event triggered when a notification is deleted (Android Only)
+   /// </summary>
+   event AzurePushNotificationDataEventHandler OnNotificationDeleted;
 ```
 
 ```csharp        
   /// <summary>
   /// Event triggered when there's an error
   /// </summary>
-  event PushNotificationErrorEventHandler OnNotificationError;
+  event AzurePushNotificationErrorEventHandler OnNotificationError;
 ```
 
 Token event usage sample:
 ```csharp
 
-  CrossPushNotification.Current.OnTokenRefresh += (s,p) =>
+  CrossAzurePushNotification.Current.OnTokenRefresh += (s,p) =>
   {
         System.Diagnostics.Debug.WriteLine($"TOKEN : {p.Token}");
   };
@@ -215,7 +232,7 @@ Token event usage sample:
 Push message received event usage sample:
 ```csharp
 
-  CrossPushNotification.Current.OnNotificationReceived += (s,p) =>
+  CrossAzurePushNotification.Current.OnNotificationReceived += (s,p) =>
   {
  
         System.Diagnostics.Debug.WriteLine("Received");
@@ -227,7 +244,7 @@ Push message received event usage sample:
 Push message opened event usage sample:
 ```csharp
   
-  CrossPushNotification.Current.OnNotificationOpened += (s,p) =>
+  CrossAzurePushNotification.Current.OnNotificationOpened += (s,p) =>
   {
                 System.Diagnostics.Debug.WriteLine("Opened");
                 foreach(var data in p.Data)
@@ -241,6 +258,17 @@ Push message opened event usage sample:
                 }
              
  };
+```
+Push message deleted event usage sample: (Android Only)
+```csharp
+
+  CrossAzurePushNotification.Current.OnNotificationDeleted+= (s,p) =>
+  {
+ 
+        System.Diagnostics.Debug.WriteLine("Deleted");
+    
+  };
+
 ```
 
 Plugin by default provides some notification customization features for each platform. Check out the [Android Customization](AndroidCustomization.md) and [iOS Customization](iOSCustomization.md) sections.
