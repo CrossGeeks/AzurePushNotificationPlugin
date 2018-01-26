@@ -90,8 +90,6 @@ namespace Plugin.AzurePushNotification
         public static void Initialize(Context context, string notificationHubConnectionString, string notificationHubPath, bool resetToken, bool createDefaultNotificationChannel = true)
         {
 
-            //Firebase.FirebaseApp.InitializeApp(Android.App.Application.Context);
-
             Hub = new NotificationHub(notificationHubPath, notificationHubConnectionString, Android.App.Application.Context);
 
             _context = context;
@@ -322,8 +320,18 @@ namespace Plugin.AzurePushNotification
 
                         try
                         {
-                            var tArray = _tags?.ToArray();
-                            var hubRegistration = Hub.Register(Token, (tArray?.Length??0) > 0? tArray: null );
+                            Registration hubRegistration = null;
+                     
+
+                            if(tags !=null && tags.Length > 0)
+                            {
+                                hubRegistration = Hub.Register(Token,tags);
+                            }
+                            else
+                            {
+                                hubRegistration = Hub.Register(Token);
+                            }
+                          
 
                             var editor = Application.Context.GetSharedPreferences(KeyGroupName, FileCreationMode.Private).Edit();
                             editor.PutBoolean(RegisteredKey, true);
@@ -353,10 +361,10 @@ namespace Plugin.AzurePushNotification
                     try
                     {
                         Hub.UnregisterAll(Token);
-
+                        _tags = new Collection<string>();
                         var editor = Application.Context.GetSharedPreferences(KeyGroupName, FileCreationMode.Private).Edit();
                         editor.PutBoolean(RegisteredKey, false);
-                        editor.PutStringSet(TagsKey, new Collection<string>());
+                        editor.PutStringSet(TagsKey, _tags);
                         editor.Commit();
                     }
                     catch (Exception ex)

@@ -359,8 +359,9 @@ namespace Plugin.AzurePushNotification
                     }
                     else
                     {
+                        _tags = new NSArray().MutableCopy() as NSMutableArray;
                         NSUserDefaults.StandardUserDefaults.SetBool(false, RegisteredKey);
-                        NSUserDefaults.StandardUserDefaults.SetValueForKey(new NSArray().MutableCopy(), TagsKey);
+                        NSUserDefaults.StandardUserDefaults.SetValueForKey(_tags, TagsKey);
                         NSUserDefaults.StandardUserDefaults.Synchronize();
                     }
                 }
