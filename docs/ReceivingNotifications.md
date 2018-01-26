@@ -83,7 +83,7 @@ Android Silent Payload Sample:
 **OnNotificationDeleted** (Android Only)
 ```csharp
 
-  CrossePushNotification.Current.OnNotificationDeleted += (s,p) =>
+  CrossAzurePushNotification.Current.OnNotificationDeleted += (s,p) =>
   {
  
         System.Diagnostics.Debug.WriteLine("Deleted");
