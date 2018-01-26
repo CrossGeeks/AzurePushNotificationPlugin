@@ -282,8 +282,16 @@ namespace Plugin.AzurePushNotification
             System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Register - Start");
             if (Hub == null)
                 return;
-           
-            _tags = NSArray.FromStrings(tags).MutableCopy() as NSMutableArray;
+
+            if (tags != null && tags.Length > 0)
+            {
+                _tags = NSArray.FromStrings(tags).MutableCopy() as NSMutableArray;
+            }
+            else
+            {
+                _tags = null;
+            }
+
             System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Register - Tags {tags}");
             await Task.Run(() =>
             {
@@ -301,11 +309,15 @@ namespace Plugin.AzurePushNotification
 
                         return;
                     }
-                    
-                    NSSet tagSet = new NSSet(tags);
+                    NSSet tagSet = null;
+                    if (tags !=null && tags.Length>0)
+                    {
+                        tagSet = new NSSet(tags);
+                    }
+             
                     NSError error;
 
-                    Hub.RegisterNative(InternalToken, tagSet.Count >0?tagSet:null, out error);
+                    Hub.RegisterNative(InternalToken, tagSet, out error);
 
                     if (error != null)
                     {
