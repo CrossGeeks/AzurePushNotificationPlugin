@@ -37,11 +37,11 @@ You should initialize the plugin on an Android Application class if you don't ha
 
 There are 3 overrides to **AzurePushNotificationManager.Initialize**:
 
-- **AzurePushNotificationManager.Initialize(Context context, bool resetToken)** : Default method to initialize plugin without supporting any user notification categories. Uses a DefaultPushHandler to provide the ui for the notification.
+- **AzurePushNotificationManager.Initialize(Context context,string notificationHubConnectionString,string notificationHubPathName, bool resetToken)** : Default method to initialize plugin without supporting any user notification categories. Uses a DefaultPushHandler to provide the ui for the notification.
 
-- **AzurePushNotificationManager.Initialize(Context context, NotificationUserCategory[] categories, bool resetToken)**  : Initializes plugin using user notification categories. Uses a DefaultPushHandler to provide the ui for the notification supporting buttons based on the action_click send on the notification
+- **AzurePushNotificationManager.Initialize(Context context,string notificationHubConnectionString,string notificationHubPathName, NotificationUserCategory[] categories, bool resetToken)**  : Initializes plugin using user notification categories. Uses a DefaultPushHandler to provide the ui for the notification supporting buttons based on the action_click send on the notification
 
-- **AzurePushNotificationManager.Initialize(Context context,IPushNotificationHandler pushHandler, bool resetToken)** : Initializes the plugin using a custom push notification handler to provide custom ui and behaviour notifications receipt and opening.
+- **AzurePushNotificationManager.Initialize(Context context,string notificationHubConnectionString,string notificationHubPathName,IPushNotificationHandler pushHandler, bool resetToken)** : Initializes the plugin using a custom push notification handler to provide custom ui and behaviour notifications receipt and opening.
 
 **Important: While debugging set resetToken parameter to true.**
 
@@ -62,9 +62,9 @@ Example of initialization:
             
             //If debug you should reset the token each time.
             #if DEBUG
-              AzurePushNotificationManager.Initialize(this,true);
+              AzurePushNotificationManager.Initialize(this,"Notification Hub Connection String","Notification Hub Path Name",true);
             #else
-              AzurePushNotificationManager.Initialize(this,false);
+              AzurePushNotificationManager.Initialize(this,"Notification Hub Connection String","Notification Hub Path Name",false);
             #endif
 
               //Handle notification when app is closed here
@@ -136,17 +136,17 @@ On Info.plist enable remote notification background mode
 
 There are 3 overrides to **AzurePushNotificationManager.Initialize**:
 
-- **AzurePushNotificationManager.Initialize(NSDictionary options,bool autoRegistration)** : Default method to initialize plugin without supporting any user notification categories. Auto registers for push notifications if second parameter is true.
+- **AzurePushNotificationManager.Initialize(string notificationHubConnectionString,string notificationHubPathName, NSDictionary options,bool autoRegistration)** : Default method to initialize plugin without supporting any user notification categories. Auto registers for push notifications if second parameter is true.
 
-- **AzurePushNotificationManager.Initialize(NSDictionary options, NotificationUserCategory[] categories)**  : Initializes plugin using user notification categories to support iOS notification actions.
+- **AzurePushNotificationManager.Initialize(string notificationHubConnectionString,string notificationHubPathName,NSDictionary options, NotificationUserCategory[] categories)**  : Initializes plugin using user notification categories to support iOS notification actions.
 
-- **AzurePushNotificationManager.Initialize(NSDictionary options,IPushNotificationHandler pushHandler)** : Initializes the plugin using a custom push notification handler to provide native feedback of notifications event on the native platform.
+- **AzurePushNotificationManager.Initialize(string notificationHubConnectionString,string notificationHubPathName,NSDictionary options,IPushNotificationHandler pushHandler)** : Initializes the plugin using a custom push notification handler to provide native feedback of notifications event on the native platform.
 
 
 Call  **AzurePushNotificationManager.Initialize** on AppDelegate FinishedLaunching
 ```csharp
 
-AzurePushNotificationManager.Initialize(options,true);
+AzurePushNotificationManager.Initialize("Notification Hub Connection String","Notification Hub Path Name",options,true);
 
 ```
  **Note: When using Xamarin Forms do it just after LoadApplication call.**
