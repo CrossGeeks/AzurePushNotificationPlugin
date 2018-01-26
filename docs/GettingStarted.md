@@ -210,7 +210,7 @@ Once token is registered/refreshed you will get it on **OnTokenRefresh** event.
     event AzurePushNotificationTokenEventHandler OnTokenRefresh;
 ```
 
-Note: Don't call **RegisterAsync** in the above event because it is called automatically each time the token changes
+Note: Don't call **RegisterAsync** in the event above because it is called automatically each time the token changes
 
 ```csharp        
   /// <summary>
