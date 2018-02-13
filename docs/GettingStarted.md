@@ -88,7 +88,7 @@ Example of initialization:
 
 ```
 
-By default the plugin launches the main launcher activity when you tap at a notification, but you can change this behaviour by setting the type of the activity you want to be launch on *AzurePushNotificationManager.NotificationActivityType**
+By default the plugin launches the main launcher activity when you tap at a notification, but you can change this behaviour by setting the type of the activity you want to be launch on **AzurePushNotificationManager.NotificationActivityType**
 
 If you set **AzurePushNotificationManager.NotificationActivityType** then put the following call on the **OnCreate** of activity of the type set. If not set then put it on your main launcher activity **OnCreate** method (On the Activity you got MainLauncher= true set)
 
