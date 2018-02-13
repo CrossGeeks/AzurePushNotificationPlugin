@@ -231,8 +231,9 @@ namespace Plugin.AzurePushNotification
         {
             add
             {
+                var previousVal = _onNotificationOpened;
                 _onNotificationOpened += value;
-                if (delayedNotificationResponse != null && _onNotificationOpened == null)
+                if (delayedNotificationResponse != null && previousVal == null)
                 {
                     var tmpParams = delayedNotificationResponse;
                     _onNotificationOpened?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationResponseEventArgs(tmpParams.Data, tmpParams.Identifier, tmpParams.Type));

@@ -2,7 +2,7 @@
 <package >
   <metadata minClientVersion="2.8.1">
     <id>Plugin.AzurePushNotification</id>
-    <version>0.2.0</version>
+    <version>1.0.0</version>
     <title>Azure Push Notification Plugin for Xamarin</title>
     <authors>Rendy Del Rosario</authors>
     <owners>crossgeeks,rdelrosario</owners>
