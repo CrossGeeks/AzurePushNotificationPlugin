@@ -4,6 +4,7 @@ using Android.Content.PM;
 using Android.Graphics;
 using Android.OS;
 using Android.Util;
+using Firebase.Iid;
 using Plugin.AzurePushNotification.Abstractions;
 using System;
 using System.Collections.Generic;
@@ -27,8 +28,7 @@ namespace Plugin.AzurePushNotification
         public bool IsRegistered { get { return Application.Context.GetSharedPreferences(KeyGroupName, FileCreationMode.Private).GetBoolean(RegisteredKey, false); } }
 
         public string[] Tags { get { return _tags?.ToArray(); } }
-
-        internal static PushNotificationActionReceiver ActionReceiver = null;
+        
         static NotificationResponse delayedNotificationResponse = null;
         internal const string KeyGroupName = "Plugin.AzurePushNotification";
         internal const string TagsKey = "TagsKey";
@@ -37,7 +37,6 @@ namespace Plugin.AzurePushNotification
         internal const string AppVersionCodeKey = "AppVersionCodeKey";
         internal const string AppVersionNameKey = "AppVersionNameKey";
         internal const string AppVersionPackageNameKey = "AppVersionPackageNameKey";
-        internal const string NotificationDeletedActionId = "Plugin.AzurePushNotification.NotificationDeletedActionId";
 
         static IList<NotificationUserCategory> userNotificationCategories = new List<NotificationUserCategory>();
         public static string NotificationContentTitleKey { get; set; }
@@ -52,6 +51,10 @@ namespace Plugin.AzurePushNotification
         public static string DefaultNotificationChannelName { get; set; } = "General";
 
         static Context _context;
+
+        internal static Type DefaultNotificationActivityType { get; set; } = null;
+
+        [Obsolete("ProcessIntent with these parameters is deprecated, please use the other override instead.")]
         public static void ProcessIntent(Intent intent, bool enableDelayedResponse = true)
         {
             Bundle extras = intent?.Extras;
@@ -87,7 +90,43 @@ namespace Plugin.AzurePushNotification
             }
         }
 
-        public static void Initialize(Context context, string notificationHubConnectionString, string notificationHubPath, bool resetToken, bool createDefaultNotificationChannel = true)
+        public static void ProcessIntent(Activity activity,Intent intent, bool enableDelayedResponse = true)
+        {
+            DefaultNotificationActivityType = activity.GetType();
+            Bundle extras = intent?.Extras;
+            if (extras != null && !extras.IsEmpty)
+            {
+                var parameters = new Dictionary<string, object>();
+                foreach (var key in extras.KeySet())
+                {
+                    if (!parameters.ContainsKey(key) && extras.Get(key) != null)
+                        parameters.Add(key, $"{extras.Get(key)}");
+                }
+
+                NotificationManager manager = _context.GetSystemService(Context.NotificationService) as NotificationManager;
+                var notificationId = extras.GetInt(DefaultPushNotificationHandler.ActionNotificationIdKey, -1);
+                if (notificationId != -1)
+                {
+                    var notificationTag = extras.GetString(DefaultPushNotificationHandler.ActionNotificationTagKey, string.Empty);
+                    if (notificationTag == null)
+                        manager.Cancel(notificationId);
+                    else
+                        manager.Cancel(notificationTag, notificationId);
+                }
+
+
+                var response = new NotificationResponse(parameters, extras.GetString(DefaultPushNotificationHandler.ActionIdentifierKey, string.Empty));
+
+                if (_onNotificationOpened == null && enableDelayedResponse)
+                    delayedNotificationResponse = response;
+                else
+                    _onNotificationOpened?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationResponseEventArgs(response.Data, response.Identifier, response.Type));
+
+                CrossAzurePushNotification.Current.NotificationHandler?.OnOpened(response);
+            }
+        }
+
+        public static void Initialize(Context context, string notificationHubConnectionString, string notificationHubPath, bool resetToken, bool createDefaultNotificationChannel = true, bool autoRegistration = true)
         {
 
             Hub = new NotificationHub(notificationHubPath, notificationHubConnectionString, Android.App.Application.Context);
@@ -96,52 +135,51 @@ namespace Plugin.AzurePushNotification
 
             CrossAzurePushNotification.Current.NotificationHandler = CrossAzurePushNotification.Current.NotificationHandler ?? new DefaultPushNotificationHandler();
 
-            ThreadPool.QueueUserWorkItem(state =>
+            if (autoRegistration)
             {
-
-                var packageName = Application.Context.PackageManager.GetPackageInfo(Application.Context.PackageName, PackageInfoFlags.MetaData).PackageName;
-                var versionCode = Application.Context.PackageManager.GetPackageInfo(Application.Context.PackageName, PackageInfoFlags.MetaData).VersionCode;
-                var versionName = Application.Context.PackageManager.GetPackageInfo(Application.Context.PackageName, PackageInfoFlags.MetaData).VersionName;
-                var prefs = Android.App.Application.Context.GetSharedPreferences(AzurePushNotificationManager.KeyGroupName, FileCreationMode.Private);
-
-                try
+                ThreadPool.QueueUserWorkItem(state =>
                 {
 
-                    var storedVersionName = prefs.GetString(AzurePushNotificationManager.AppVersionNameKey, string.Empty);
-                    var storedVersionCode = prefs.GetString(AzurePushNotificationManager.AppVersionCodeKey, string.Empty);
-                    var storedPackageName = prefs.GetString(AzurePushNotificationManager.AppVersionPackageNameKey, string.Empty);
+                    var packageName = Application.Context.PackageManager.GetPackageInfo(Application.Context.PackageName, PackageInfoFlags.MetaData).PackageName;
+                    var versionCode = Application.Context.PackageManager.GetPackageInfo(Application.Context.PackageName, PackageInfoFlags.MetaData).VersionCode;
+                    var versionName = Application.Context.PackageManager.GetPackageInfo(Application.Context.PackageName, PackageInfoFlags.MetaData).VersionName;
+                    var prefs = Android.App.Application.Context.GetSharedPreferences(AzurePushNotificationManager.KeyGroupName, FileCreationMode.Private);
 
-
-                    if (resetToken || (!string.IsNullOrEmpty(storedPackageName) && (!storedPackageName.Equals(packageName, StringComparison.CurrentCultureIgnoreCase) || !storedVersionName.Equals(versionName, StringComparison.CurrentCultureIgnoreCase) || !storedVersionCode.Equals($"{versionCode}", StringComparison.CurrentCultureIgnoreCase))))
+                    try
                     {
-                        CleanUp();
+
+                        var storedVersionName = prefs.GetString(AzurePushNotificationManager.AppVersionNameKey, string.Empty);
+                        var storedVersionCode = prefs.GetString(AzurePushNotificationManager.AppVersionCodeKey, string.Empty);
+                        var storedPackageName = prefs.GetString(AzurePushNotificationManager.AppVersionPackageNameKey, string.Empty);
+
+
+                        if (resetToken || (!string.IsNullOrEmpty(storedPackageName) && (!storedPackageName.Equals(packageName, StringComparison.CurrentCultureIgnoreCase) || !storedVersionName.Equals(versionName, StringComparison.CurrentCultureIgnoreCase) || !storedVersionCode.Equals($"{versionCode}", StringComparison.CurrentCultureIgnoreCase))))
+                        {
+                            CleanUp(false);
+
+                        }
 
                     }
-
-                }
-                catch (Exception ex)
-                {
-                    _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(ex.ToString()));
-                }
-                finally
-                {
-                    var editor = prefs.Edit();
-                    editor.PutString(AzurePushNotificationManager.AppVersionNameKey, $"{versionName}");
-                    editor.PutString(AzurePushNotificationManager.AppVersionCodeKey, $"{versionCode}");
-                    editor.PutString(AzurePushNotificationManager.AppVersionPackageNameKey, $"{packageName}");
-                    editor.Commit();
-                }
+                    catch (Exception ex)
+                    {
+                        _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.UnregistrationFailed, ex.ToString()));
+                    }
+                    finally
+                    {
+                        var editor = prefs.Edit();
+                        editor.PutString(AzurePushNotificationManager.AppVersionNameKey, $"{versionName}");
+                        editor.PutString(AzurePushNotificationManager.AppVersionCodeKey, $"{versionCode}");
+                        editor.PutString(AzurePushNotificationManager.AppVersionPackageNameKey, $"{packageName}");
+                        editor.Commit();
+                    }
 
 
-                var token = Firebase.Iid.FirebaseInstanceId.Instance.Token;
-                if (!string.IsNullOrEmpty(token))
-                {
-
-                    SaveToken(token);
-                }
+                    CrossAzurePushNotification.Current.RegisterForPushNotifications();
 
 
-            });
+                });
+            }
+           
 
             if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O && createDefaultNotificationChannel)
             {
@@ -157,13 +195,33 @@ namespace Plugin.AzurePushNotification
 
             System.Diagnostics.Debug.WriteLine(CrossAzurePushNotification.Current.Token);
         }
-        public static void Initialize(Context context, string notificationHubConnectionString, string notificationHubPath, NotificationUserCategory[] notificationCategories, bool resetToken, bool createDefaultNotificationChannel = true)
+        public static void Initialize(Context context, string notificationHubConnectionString, string notificationHubPath, NotificationUserCategory[] notificationCategories, bool resetToken, bool createDefaultNotificationChannel = true,bool autoRegistration = true)
         {
 
-            Initialize(context, notificationHubConnectionString, notificationHubPath, resetToken, createDefaultNotificationChannel);
+            Initialize(context, notificationHubConnectionString, notificationHubPath, resetToken, createDefaultNotificationChannel, autoRegistration);
             RegisterUserNotificationCategories(notificationCategories);
 
         }
+
+
+        public async System.Threading.Tasks.Task RegisterForPushNotifications()
+        {
+            await System.Threading.Tasks.Task.Run(() =>
+            {
+                var token = FirebaseInstanceId.Instance.Token;
+                if (!string.IsNullOrEmpty(token))
+                {
+
+                    SaveToken(token);
+                }
+            });
+
+        }
+        public void UnregisterForPushNotifications()
+        {
+            Reset();
+        }
+
         public static void Reset()
         {
             try
@@ -175,23 +233,27 @@ namespace Plugin.AzurePushNotification
             }
             catch (Exception ex)
             {
-                _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(ex.ToString()));
+                _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.UnregistrationFailed,ex.ToString()));
             }
 
 
         }
 
-        static void CleanUp()
+        static void CleanUp(bool clearAll = true)
         {
+            if(clearAll)
+            {
+                CrossAzurePushNotification.Current.UnregisterAsync();
+            }
             Firebase.Iid.FirebaseInstanceId.Instance.DeleteInstanceId();
             SaveToken(string.Empty);
         }
 
 
-        public static void Initialize(Context context, string notificationHubConnectionString, string notificationHubPath, IPushNotificationHandler pushNotificationHandler, bool resetToken, bool createDefaultNotificationChannel = true)
+        public static void Initialize(Context context, string notificationHubConnectionString, string notificationHubPath, IPushNotificationHandler pushNotificationHandler, bool resetToken, bool createDefaultNotificationChannel = true,bool autoRegistration = true)
         {
             CrossAzurePushNotification.Current.NotificationHandler = pushNotificationHandler;
-            Initialize(context,notificationHubConnectionString,notificationHubPath, resetToken, createDefaultNotificationChannel);
+            Initialize(context,notificationHubConnectionString,notificationHubPath, resetToken, createDefaultNotificationChannel, autoRegistration);
         }
 
         public static void ClearUserNotificationCategories()
@@ -316,7 +378,7 @@ namespace Plugin.AzurePushNotification
                         {
                             System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Unregister- Error - {ex.Message}");
 
-                            _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(ex.Message));
+                            _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.NotificationHubUnregistrationFailed, ex.Message));
                         }
 
                         try
@@ -343,7 +405,7 @@ namespace Plugin.AzurePushNotification
                         catch (Exception ex)
                         {
                             System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Register - Error - {ex.Message}");
-                            _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(ex.Message));
+                            _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.NotificationHubRegistrationFailed, ex.Message));
                         }
                     }
 
@@ -372,7 +434,7 @@ namespace Plugin.AzurePushNotification
                     {
                         System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Error - {ex.Message}");
 
-                        _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(ex.Message));
+                        _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.NotificationHubUnregistrationFailed,ex.Message));
                     }
                 }
             });

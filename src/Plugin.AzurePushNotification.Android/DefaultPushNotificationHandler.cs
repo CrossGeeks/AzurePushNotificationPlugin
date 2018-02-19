@@ -247,7 +247,7 @@ namespace Plugin.AzurePushNotification
                 }
             }
 
-            Intent resultIntent = typeof(Activity).IsAssignableFrom(AzurePushNotificationManager.NotificationActivityType) ? new Intent(Application.Context, AzurePushNotificationManager.NotificationActivityType) : context.PackageManager.GetLaunchIntentForPackage(context.PackageName);
+            Intent resultIntent = typeof(Activity).IsAssignableFrom(AzurePushNotificationManager.NotificationActivityType) ? new Intent(Application.Context, AzurePushNotificationManager.NotificationActivityType) : (AzurePushNotificationManager.DefaultNotificationActivityType == null ? context.PackageManager.GetLaunchIntentForPackage(context.PackageName) : new Intent(Application.Context, AzurePushNotificationManager.DefaultNotificationActivityType));
 
             Bundle extras = new Bundle();
             foreach (var p in parameters)
@@ -264,8 +264,8 @@ namespace Plugin.AzurePushNotification
             {
                 resultIntent.SetFlags(AzurePushNotificationManager.NotificationActivityFlags.Value);
             }
-
-            var pendingIntent = PendingIntent.GetActivity(context, 0, resultIntent, PendingIntentFlags.OneShot | PendingIntentFlags.UpdateCurrent);
+            int requestCode = new Java.Util.Random().NextInt();
+            var pendingIntent = PendingIntent.GetActivity(context, requestCode, resultIntent,PendingIntentFlags.UpdateCurrent);
 
             var chanId = AzurePushNotificationManager.DefaultNotificationChannelId;
             if (parameters.TryGetValue(ChannelIdKey, out object channelId) && channelId != null)
@@ -280,9 +280,8 @@ namespace Plugin.AzurePushNotification
                 .SetAutoCancel(true)
                 .SetContentIntent(pendingIntent);
 
-            var deleteIntent = new Intent();
-            deleteIntent.SetAction(AzurePushNotificationManager.NotificationDeletedActionId);
-            var pendingDeleteIntent = PendingIntent.GetBroadcast(context, 0, deleteIntent, PendingIntentFlags.OneShot | PendingIntentFlags.UpdateCurrent);
+            var deleteIntent = new Intent(context,typeof(PushNotificationDeletedReceiver));
+            var pendingDeleteIntent = PendingIntent.GetBroadcast(context, requestCode, deleteIntent,PendingIntentFlags.CancelCurrent);
             notificationBuilder.SetDeleteIntent(pendingDeleteIntent);
 
             if (Build.VERSION.SdkInt < Android.OS.BuildVersionCodes.O)
@@ -374,6 +373,7 @@ namespace Plugin.AzurePushNotification
 
                         foreach (var action in userCat.Actions)
                         {
+                            var aRequestCode = Guid.NewGuid().GetHashCode();
                             if (userCat.Category.Equals(category, StringComparison.CurrentCultureIgnoreCase))
                             {
                                 Intent actionIntent = null;
@@ -382,57 +382,33 @@ namespace Plugin.AzurePushNotification
 
                                 if (action.Type == NotificationActionType.Foreground)
                                 {
-                                    actionIntent = typeof(Activity).IsAssignableFrom(AzurePushNotificationManager.NotificationActivityType) ? new Intent(Application.Context, AzurePushNotificationManager.NotificationActivityType) : context.PackageManager.GetLaunchIntentForPackage(context.PackageName);
+                                    actionIntent = typeof(Activity).IsAssignableFrom(AzurePushNotificationManager.NotificationActivityType) ? new Intent(Application.Context, AzurePushNotificationManager.NotificationActivityType) : (AzurePushNotificationManager.DefaultNotificationActivityType == null ? context.PackageManager.GetLaunchIntentForPackage(context.PackageName) : new Intent(Application.Context, AzurePushNotificationManager.DefaultNotificationActivityType));
 
                                     if (AzurePushNotificationManager.NotificationActivityFlags != null)
                                     {
                                         actionIntent.SetFlags(AzurePushNotificationManager.NotificationActivityFlags.Value);
                                     }
 
-                                    actionIntent.SetAction($"{action.Id}");
                                     extras.PutString(ActionIdentifierKey, action.Id);
                                     actionIntent.PutExtras(extras);
-                                    pendingActionIntent = PendingIntent.GetActivity(context, 0, actionIntent, PendingIntentFlags.OneShot | PendingIntentFlags.UpdateCurrent);
+                                    pendingActionIntent = PendingIntent.GetActivity(context, aRequestCode, actionIntent, PendingIntentFlags.UpdateCurrent);
 
                                 }
                                 else
                                 {
-                                    actionIntent = new Intent();
-                                    //actionIntent.SetAction($"{category}.{action.Id}");
-                                    actionIntent.SetAction($"{Application.Context.PackageManager.GetPackageInfo(Application.Context.PackageName, PackageInfoFlags.MetaData).PackageName}.{action.Id}");
+                                    actionIntent = new Intent(context, typeof(PushNotificationActionReceiver));
                                     extras.PutString(ActionIdentifierKey, action.Id);
                                     actionIntent.PutExtras(extras);
-                                    pendingActionIntent = PendingIntent.GetBroadcast(context, 0, actionIntent, PendingIntentFlags.OneShot | PendingIntentFlags.UpdateCurrent);
+                                    pendingActionIntent = PendingIntent.GetBroadcast(context, aRequestCode, actionIntent, PendingIntentFlags.UpdateCurrent);
 
                                 }
 
                                 notificationBuilder.AddAction(context.Resources.GetIdentifier(action.Icon, "drawable", Application.Context.PackageName), action.Title, pendingActionIntent);
                             }
-
-
-                            if (AzurePushNotificationManager.ActionReceiver == null)
-                            {
-                                if (intentFilter == null)
-                                {
-                                    intentFilter = new IntentFilter();
-                                }
-
-                                if (!intentFilter.HasAction(action.Id))
-                                {
-                                    intentFilter.AddAction($"{Application.Context.PackageManager.GetPackageInfo(Application.Context.PackageName, PackageInfoFlags.MetaData).PackageName}.{action.Id}");
-                                }
-
-                            }
                         }
                     }
                 }
-
-                if (intentFilter != null)
-                {
-
-                    AzurePushNotificationManager.ActionReceiver = new PushNotificationActionReceiver();
-                    context.RegisterReceiver(AzurePushNotificationManager.ActionReceiver, intentFilter);
-                }
+                
             }
 
             OnBuildNotification(notificationBuilder, parameters);

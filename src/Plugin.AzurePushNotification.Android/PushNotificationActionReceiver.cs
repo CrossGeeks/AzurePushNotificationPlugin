@@ -29,11 +29,7 @@ namespace Plugin.AzurePushNotification
                 }
             }
 
-
-            CrossAzurePushNotification.Current.NotificationHandler?.OnReceived(parameters);
             AzurePushNotificationManager.RegisterData(parameters);
-
-
 
             NotificationManager manager = context.GetSystemService(Context.NotificationService) as NotificationManager;
             var notificationId = extras.GetInt(DefaultPushNotificationHandler.ActionNotificationIdKey, -1);
@@ -47,9 +43,6 @@ namespace Plugin.AzurePushNotification
                     manager.Cancel(notificationTag, notificationId);
 
             }
-
-            context.UnregisterReceiver(AzurePushNotificationManager.ActionReceiver);
-            AzurePushNotificationManager.ActionReceiver = null;
         }
     }
 }

@@ -4,6 +4,16 @@ using System.Threading.Tasks;
 
 namespace Plugin.AzurePushNotification.Abstractions
 {
+    public enum AzurePushNotificationErrorType
+    {
+        Unknown,
+        PermissionDenied,
+        RegistrationFailed,
+        UnregistrationFailed,
+        NotificationHubRegistrationFailed,
+        NotificationHubUnregistrationFailed
+    }
+
     public delegate void AzurePushNotificationTokenEventHandler(object source, AzurePushNotificationTokenEventArgs e);
 
     public class AzurePushNotificationTokenEventArgs : EventArgs
@@ -21,10 +31,12 @@ namespace Plugin.AzurePushNotification.Abstractions
 
     public class AzurePushNotificationErrorEventArgs : EventArgs
     {
+        public AzurePushNotificationErrorType Type;
         public string Message { get; }
 
-        public AzurePushNotificationErrorEventArgs(string message)
+        public AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType type, string message)
         {
+            Type = type;
             Message = message;
         }
 
@@ -109,6 +121,16 @@ namespace Plugin.AzurePushNotification.Abstractions
         /// Event triggered when there's an error
         /// </summary>
         event AzurePushNotificationErrorEventHandler OnNotificationError;
+        /// <summary>
+        /// Register push notifications on demand
+        /// </summary>
+        /// <returns></returns>
+        Task RegisterForPushNotifications();
+        /// <summary>
+        /// Unregister push notifications on demand
+        /// </summary>
+        /// <returns></returns>
+        void UnregisterForPushNotifications();
         /// <summary>
         /// Push notification token
         /// </summary>

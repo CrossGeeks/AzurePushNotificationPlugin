@@ -11,7 +11,7 @@ using Android.Content;
 
 namespace AzurePushNotificationSample.Droid
 {
-    [Activity(Label = "AzurePushNotificationSample", Icon = "@drawable/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
+    [Activity(Label = "AzurePushNotificationSample", Icon = "@drawable/icon", Theme = "@style/MainTheme", ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         protected override void OnCreate(Bundle bundle)
@@ -23,13 +23,13 @@ namespace AzurePushNotificationSample.Droid
 
             global::Xamarin.Forms.Forms.Init(this, bundle);
             LoadApplication(new App());
-            AzurePushNotificationManager.ProcessIntent(Intent);
+            AzurePushNotificationManager.ProcessIntent(this,Intent);
         }
 
         protected override void OnNewIntent(Intent intent)
         {
             base.OnNewIntent(intent);
-            AzurePushNotificationManager.ProcessIntent(intent);
+            AzurePushNotificationManager.ProcessIntent(this,intent);
         }
     }
 }

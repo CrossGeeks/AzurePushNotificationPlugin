@@ -5,7 +5,6 @@ using Android.Content;
 namespace Plugin.AzurePushNotification
 {
     [BroadcastReceiver]
-    [IntentFilter(new[] { AzurePushNotificationManager.NotificationDeletedActionId })]
     public class PushNotificationDeletedReceiver : BroadcastReceiver
     {
         public override void OnReceive(Context context, Intent intent)

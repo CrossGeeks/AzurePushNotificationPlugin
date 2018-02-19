@@ -10,7 +10,18 @@ namespace AzurePushNotificationSample
 {
 	public partial class MainPage : ContentPage
 	{
-		public MainPage()
+        public string Message
+        {
+            get
+            {
+                return textLabel.Text;
+            }
+            set
+            {
+                textLabel.Text = value;
+            }
+        }
+        public MainPage()
 		{
 			InitializeComponent();
 

@@ -37,11 +37,11 @@ You should initialize the plugin on an Android Application class if you don't ha
 
 There are 3 overrides to **AzurePushNotificationManager.Initialize**:
 
-- **AzurePushNotificationManager.Initialize(Context context,string notificationHubConnectionString,string notificationHubPathName, bool resetToken)** : Default method to initialize plugin without supporting any user notification categories. Uses a DefaultPushHandler to provide the ui for the notification.
+- **AzurePushNotificationManager.Initialize(Context context,string notificationHubConnectionString,string notificationHubPathName, bool resetToken,bool autoRegistration)** : Default method to initialize plugin without supporting any user notification categories. Uses a DefaultPushHandler to provide the ui for the notification.
 
-- **AzurePushNotificationManager.Initialize(Context context,string notificationHubConnectionString,string notificationHubPathName, NotificationUserCategory[] categories, bool resetToken)**  : Initializes plugin using user notification categories. Uses a DefaultPushHandler to provide the ui for the notification supporting buttons based on the action_click send on the notification
+- **AzurePushNotificationManager.Initialize(Context context,string notificationHubConnectionString,string notificationHubPathName, NotificationUserCategory[] categories, bool resetToken,bool autoRegistration)**  : Initializes plugin using user notification categories. Uses a DefaultPushHandler to provide the ui for the notification supporting buttons based on the action_click send on the notification
 
-- **AzurePushNotificationManager.Initialize(Context context,string notificationHubConnectionString,string notificationHubPathName,IPushNotificationHandler pushHandler, bool resetToken)** : Initializes the plugin using a custom push notification handler to provide custom ui and behaviour notifications receipt and opening.
+- **AzurePushNotificationManager.Initialize(Context context,string notificationHubConnectionString,string notificationHubPathName,IPushNotificationHandler pushHandler, bool resetToken,bool autoRegistration)** : Initializes the plugin using a custom push notification handler to provide custom ui and behaviour notifications receipt and opening.
 
 **Important: While debugging set resetToken parameter to true.**
 
@@ -99,14 +99,14 @@ If you set **AzurePushNotificationManager.NotificationActivityType** then put th
 
 			//Other initialization stuff
 
-            AzurePushNotificationManager.ProcessIntent(Intent);
+            AzurePushNotificationManager.ProcessIntent(this,Intent);
         }
 
  ```
 
 **Note: When using Xamarin Forms do it just after LoadApplication call.**
 
-By default the plugin launches the activity when you tap at a notification with activity flags: **ActivityFlags.ClearTop | ActivityFlags.SingleTop**.
+By default the plugin launches the activity where **ProcessIntent** method is called when you tap at a notification, but you can change this behaviour by setting the type of the activity you want to be launch on *PushNotificationManager.NotificationActivityType**
 
 You can change this behaviour by setting **AzurePushNotificationManager.NotificationActivityFlags**. 
  
@@ -116,7 +116,7 @@ If you set **AzurePushNotificationManager.NotificationActivityFlags** to Activit
 	    protected override void OnNewIntent(Intent intent)
         {
             base.OnNewIntent(intent);
-            AzurePushNotificationManager.ProcessIntent(intent);
+            AzurePushNotificationManager.ProcessIntent(this,intent);
         }
  ```
 
@@ -136,11 +136,11 @@ On Info.plist enable remote notification background mode
 
 There are 3 overrides to **AzurePushNotificationManager.Initialize**:
 
-- **AzurePushNotificationManager.Initialize(string notificationHubConnectionString,string notificationHubPathName, NSDictionary options,bool autoRegistration)** : Default method to initialize plugin without supporting any user notification categories. Auto registers for push notifications if second parameter is true.
+- **AzurePushNotificationManager.Initialize(string notificationHubConnectionString,string notificationHubPathName, NSDictionary options,bool autoRegistration,bool autoRegistration)** : Default method to initialize plugin without supporting any user notification categories. Auto registers for push notifications if second parameter is true.
 
-- **AzurePushNotificationManager.Initialize(string notificationHubConnectionString,string notificationHubPathName,NSDictionary options, NotificationUserCategory[] categories)**  : Initializes plugin using user notification categories to support iOS notification actions.
+- **AzurePushNotificationManager.Initialize(string notificationHubConnectionString,string notificationHubPathName,NSDictionary options, NotificationUserCategory[] categories,bool autoRegistration)**  : Initializes plugin using user notification categories to support iOS notification actions.
 
-- **AzurePushNotificationManager.Initialize(string notificationHubConnectionString,string notificationHubPathName,NSDictionary options,IPushNotificationHandler pushHandler)** : Initializes the plugin using a custom push notification handler to provide native feedback of notifications event on the native platform.
+- **AzurePushNotificationManager.Initialize(string notificationHubConnectionString,string notificationHubPathName,NSDictionary options,IPushNotificationHandler pushHandler,bool autoRegistration)** : Initializes the plugin using a custom push notification handler to provide native feedback of notifications event on the native platform.
 
 
 Call  **AzurePushNotificationManager.Initialize** on AppDelegate FinishedLaunching
@@ -197,6 +197,17 @@ Unregister tags
    /// </summary>
     await CrossAzurePushNotification.Current.UnregisterAsync();
 ```
+
+### On Demand Registration
+
+When plugin initializes by default auto request permission the device for push notifications. If needed you can do on demand permisssion registration by turning off auto registration when initializing the plugin.
+
+Use the following method for on demand permission registration:
+
+```csharp
+   CrossAzurePushNotification.Current.RegisterForPushNotifications();
+```
+
 
 ### Events
 

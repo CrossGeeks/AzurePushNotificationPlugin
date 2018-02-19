@@ -4,8 +4,9 @@
              xmlns:local="clr-namespace:AzurePushNotificationSample"
              x:Class="AzurePushNotificationSample.MainPage">
 
-	<Label x:Name="textLabel" Text="Welcome to Xamarin.Forms!" 
+    <Label x:Name="textLabel" 
            VerticalOptions="Center" 
            HorizontalOptions="Center" />
+
 
 </ContentPage>
