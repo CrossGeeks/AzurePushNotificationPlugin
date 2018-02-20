@@ -68,7 +68,7 @@ Example of initialization:
             #endif
 
               //Handle notification when app is closed here
-              CrossPushNotification.Current.OnNotificationReceived += (s,p) =>
+              CrossAzurePushNotification.Current.OnNotificationReceived += (s,p) =>
               {
 
 
