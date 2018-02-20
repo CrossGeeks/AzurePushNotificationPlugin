@@ -106,7 +106,7 @@ If you set **AzurePushNotificationManager.NotificationActivityType** then put th
 
 **Note: When using Xamarin Forms do it just after LoadApplication call.**
 
-By default the plugin launches the activity where **ProcessIntent** method is called when you tap at a notification, but you can change this behaviour by setting the type of the activity you want to be launch on *PushNotificationManager.NotificationActivityType**
+By default the plugin launches the activity where **ProcessIntent** method is called when you tap at a notification, but you can change this behaviour by setting the type of the activity you want to be launch on **AzurePushNotificationManager.NotificationActivityType**
 
 You can change this behaviour by setting **AzurePushNotificationManager.NotificationActivityFlags**. 
  
