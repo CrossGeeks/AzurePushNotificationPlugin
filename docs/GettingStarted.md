@@ -2,6 +2,8 @@
 
 ### Android Configuration
 
+First, make sure you setup everthing on Firebase portal and Azure portal.
+
 Edit AndroidManifest.xml and insert the following receiver elements **inside** the **application** section:
 
 ```xml
@@ -125,6 +127,10 @@ If you set **AzurePushNotificationManager.NotificationActivityFlags** to Activit
  [Android Customization](../docs/AndroidCustomization.md)
 
 ## Starting with iOS 
+
+First, make sure you set everything on Apple Developer Portal and Azure portal. You can follow this guide:
+
+https://docs.microsoft.com/en-us/azure/notification-hubs/notification-hubs-push-notification-http2-token-authentification
 
 ### iOS Configuration
 
