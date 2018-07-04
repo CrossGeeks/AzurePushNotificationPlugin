@@ -61,6 +61,16 @@ Example of initialization:
         public override void OnCreate()
         {
             base.OnCreate();
+	    
+	    //Set the default notification channel for your app when running Android Oreo
+            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
+            {
+                //Change for your default notification channel id here
+                AzurePushNotificationManager.DefaultNotificationChannelId = "DefaultChannel";
+
+                //Change for your default notification channel name here
+                AzurePushNotificationManager.DefaultNotificationChannelName = "General";
+            }
             
             //If debug you should reset the token each time.
             #if DEBUG
@@ -76,15 +86,7 @@ Example of initialization:
 
               };
 
-			//Set the default notification channel for your app when running Android Oreo
-            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
-            {
-                //Change for your default notification channel id here
-                AzurePushNotificationManager.DefaultNotificationChannelId = "DefaultChannel";
-
-                //Change for your default notification channel name here
-                AzurePushNotificationManager.DefaultNotificationChannelName = "General";
-            }
+	  
          }
     }
 
