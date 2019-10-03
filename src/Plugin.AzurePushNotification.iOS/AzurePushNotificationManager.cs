@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using UIKit;
 using UserNotifications;
@@ -52,6 +53,23 @@ namespace Plugin.AzurePushNotification
                     trimmedDeviceToken = trimmedDeviceToken.Trim('>');
                     trimmedDeviceToken = trimmedDeviceToken.Trim();
                     trimmedDeviceToken = trimmedDeviceToken.Replace(" ", "");
+                }
+
+                bool aboveiOS13 = UIDevice.CurrentDevice.CheckSystemVersion(13, 0);
+
+                if (aboveiOS13)
+                {
+                    if (InternalToken != null)
+                    {
+                        var token = InternalToken.ToArray();
+                        var hexToken = new StringBuilder(token.Length * 2);
+                        foreach (var b in token)
+                        {
+                            hexToken.AppendFormat("{0:x2}", b);
+                        }
+
+                        trimmedDeviceToken = hexToken.ToString();
+                    }
                 }
 
                 return trimmedDeviceToken ?? string.Empty;
