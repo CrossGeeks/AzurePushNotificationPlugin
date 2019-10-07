@@ -46,3 +46,4 @@ Here you will find detailed documentation on setting up and using the Azure Push
 * [Tymen Steur](https://github.com/TymenSteur)
 * [Mircea-Tiberiu MATEI](https://github.com/matei-tm)
 * [Pier-Lionel Sgard](https://github.com/plsgard)
+* [Peseur](https://github.com/Peseur)
