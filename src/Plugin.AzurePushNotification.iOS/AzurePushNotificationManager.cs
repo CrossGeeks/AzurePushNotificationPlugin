@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using UIKit;
 using UserNotifications;
-using WindowsAzure.Messaging;
 
 namespace Plugin.AzurePushNotification
 {
@@ -46,19 +45,17 @@ namespace Plugin.AzurePushNotification
             get
             {
                 string trimmedDeviceToken = InternalToken?.Description;
+
                 if (!string.IsNullOrWhiteSpace(trimmedDeviceToken))
                 {
-                    trimmedDeviceToken = trimmedDeviceToken.Trim('<');
-                    trimmedDeviceToken = trimmedDeviceToken.Trim('>');
-                    trimmedDeviceToken = trimmedDeviceToken.Trim();
-                    trimmedDeviceToken = trimmedDeviceToken.Replace(" ", "");
-                }
-
-                bool aboveiOS13 = UIDevice.CurrentDevice.CheckSystemVersion(13, 0);
-
-                if (aboveiOS13)
-                {
-                    if (InternalToken != null)
+                    if (trimmedDeviceToken.StartsWith("<"))
+                    {
+                        trimmedDeviceToken = trimmedDeviceToken.Trim('<');
+                        trimmedDeviceToken = trimmedDeviceToken.Trim('>');
+                        trimmedDeviceToken = trimmedDeviceToken.Trim();
+                        trimmedDeviceToken = trimmedDeviceToken.Replace(" ", "");
+                    }
+                    else if (InternalToken != null) // iOS sdk 13
                     {
                         var token = InternalToken.ToArray();
                         var hexToken = new StringBuilder(token.Length * 2);
