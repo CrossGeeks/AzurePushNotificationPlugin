@@ -125,9 +125,9 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Plugin.AzurePushNotification">
-      <Version>1.1.0</Version>
+      <Version>2.0.1-beta</Version>
     </PackageReference>
-    <PackageReference Include="Xamarin.Forms" Version="2.5.0.121934" />
+    <PackageReference Include="Xamarin.Forms" Version="4.4.0.991265" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <ItemGroup>
