@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Plugin.AzurePushNotification.Abstractions
+namespace Plugin.AzurePushNotification
 {
     public enum AzurePushNotificationErrorType
     {
@@ -125,7 +125,7 @@ namespace Plugin.AzurePushNotification.Abstractions
         /// Register push notifications on demand
         /// </summary>
         /// <returns></returns>
-        Task RegisterForPushNotifications();
+        void RegisterForPushNotifications();
         /// <summary>
         /// Unregister push notifications on demand
         /// </summary>
@@ -135,6 +135,21 @@ namespace Plugin.AzurePushNotification.Abstractions
         /// Push notification token
         /// </summary>
         string Token { get; }
+
+        /// <summary>
+        /// Delegate to feed token back to the plugin
+        /// </summary>
+        Func<string> RetrieveSavedToken { get; set; }
+        /// <summary>
+        /// Delegate to save the token
+        /// </summary>
+        Action<string> SaveToken { get; set; }
+
+        /// <summary>
+        /// Indicates if push notifications are enabled
+        /// </summary>
+        bool IsEnabled { get; }
+
         /// <summary>
         /// Indicates if is registered in notification hub
         /// </summary>

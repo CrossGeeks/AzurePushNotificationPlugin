@@ -15,7 +15,6 @@ using Android.Support.V4.App;
 using Android.Views;
 using Android.Widget;
 using Java.Util;
-using Plugin.AzurePushNotification.Abstractions;
 
 namespace Plugin.AzurePushNotification
 {

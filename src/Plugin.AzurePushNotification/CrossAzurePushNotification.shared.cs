@@ -1,5 +1,4 @@
-﻿using Plugin.AzurePushNotification.Abstractions;
-using System;
+﻿using System;
 
 namespace Plugin.AzurePushNotification
 {
@@ -28,7 +27,7 @@ namespace Plugin.AzurePushNotification
 
     static IAzurePushNotification CreateAzurePushNotification()
     {
-#if NETSTANDARD1_0
+#if NETSTANDARD2_0
             return null;
 #else
             return new AzurePushNotificationManager();

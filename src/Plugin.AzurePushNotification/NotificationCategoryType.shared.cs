@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Plugin.AzurePushNotification.Abstractions
+namespace Plugin.AzurePushNotification
 {
     //This just applies for iOS on Android is always set as default when used
     public enum NotificationCategoryType

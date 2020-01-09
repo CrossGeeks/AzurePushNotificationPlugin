@@ -64,5 +64,11 @@ namespace Plugin.AzurePushNotification
             AzurePushNotificationManager.RegisterData(parameters);
             CrossAzurePushNotification.Current.NotificationHandler?.OnReceived(parameters);
         }
+
+        public override void OnNewToken(string p0)
+        {
+            AzurePushNotificationManager.RegisterToken(p0);
+            System.Diagnostics.Debug.WriteLine($"REFRESHED TOKEN: {p0}");
+        }
     }
 }

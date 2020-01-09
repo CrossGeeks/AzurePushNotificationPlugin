@@ -1,5 +1,4 @@
 using Foundation;
-using Plugin.AzurePushNotification.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,11 +15,11 @@ namespace Plugin.AzurePushNotification
     /// </summary>
     public class AzurePushNotificationManager : NSObject, IAzurePushNotification, IUNUserNotificationCenterDelegate
     {
-
+        static NotificationResponse delayedNotificationResponse = null;
+        static NSData DeviceToken { get; set; }
         static NSString TagsKey = new NSString("Tags");
-        static NSString TokenKey = new NSString("Token");
-        static NSString EnabledKey = new NSString("Enabled");
-        NSString RegisteredKey = new NSString("Registered");
+        static NSString TokenKey;
+        static string PushRegisteredKey;
 
         static NSMutableArray _tags = (NSUserDefaults.StandardUserDefaults.ValueForKey(TagsKey) as NSArray ?? new NSArray()).MutableCopy() as NSMutableArray;
         public string[] Tags
@@ -41,41 +40,39 @@ namespace Plugin.AzurePushNotification
             }
 
         }
+
+
+        public Func<string> RetrieveSavedToken { get; set; } = InternalRetrieveSavedToken;
+        public Action<string> SaveToken { get; set; } = InternalSaveToken;
+
+
         public string Token
         {
             get
             {
-                string trimmedDeviceToken = InternalToken?.Description;
-
-                if (!string.IsNullOrWhiteSpace(trimmedDeviceToken))
-                {
-                    if (trimmedDeviceToken.StartsWith("<"))
-                    {
-                        trimmedDeviceToken = trimmedDeviceToken.Trim('<');
-                        trimmedDeviceToken = trimmedDeviceToken.Trim('>');
-                        trimmedDeviceToken = trimmedDeviceToken.Trim();
-                        trimmedDeviceToken = trimmedDeviceToken.Replace(" ", "");
-                    }
-                    else if (InternalToken != null) // iOS sdk 13
-                    {
-                        var token = InternalToken.ToArray();
-                        var hexToken = new StringBuilder(token.Length * 2);
-                        foreach (var b in token)
-                        {
-                            hexToken.AppendFormat("{0:x2}", b);
-                        }
-
-                        trimmedDeviceToken = hexToken.ToString();
-                    }
-                }
-
-                return trimmedDeviceToken ?? string.Empty;
+                return RetrieveSavedToken?.Invoke() ?? string.Empty;
+            }
+            internal set
+            {
+                SaveToken?.Invoke(value);
             }
         }
 
-        public bool IsRegistered { get { return NSUserDefaults.StandardUserDefaults.BoolForKey(RegisteredKey); } }
 
-        public bool IsEnabled { get { return NSUserDefaults.StandardUserDefaults.BoolForKey(EnabledKey); } }
+
+        internal static string InternalRetrieveSavedToken()
+        {
+            return !string.IsNullOrEmpty(TokenKey)?NSUserDefaults.StandardUserDefaults.StringForKey(TokenKey):null;
+        }
+
+        internal static void InternalSaveToken(string token)
+        {
+            NSUserDefaults.StandardUserDefaults.SetString(token, TokenKey);
+        }
+
+        public bool IsRegistered { get { return NSUserDefaults.StandardUserDefaults.BoolForKey(PushRegisteredKey); } }
+
+        public bool IsEnabled { get { return UIApplication.SharedApplication.IsRegisteredForRemoteNotifications; } }
 
 
         static SBNotificationHub Hub { get; set; }
@@ -85,12 +82,15 @@ namespace Plugin.AzurePushNotification
         {
             get
             {
-                return NSUserDefaults.StandardUserDefaults.ValueForKey(TokenKey) as NSData;
+                return !string.IsNullOrEmpty(TokenKey) ? (NSUserDefaults.StandardUserDefaults.ValueForKey(TokenKey) as NSData):null;
             }
             set
             {
-                NSUserDefaults.StandardUserDefaults.SetValueForKey(value, TokenKey);
-                NSUserDefaults.StandardUserDefaults.Synchronize();
+                if (!string.IsNullOrEmpty(TokenKey))
+                {
+                    NSUserDefaults.StandardUserDefaults.SetValueForKey(value, TokenKey);
+                    NSUserDefaults.StandardUserDefaults.Synchronize();
+                }
             }
         }
 
@@ -131,7 +131,14 @@ namespace Plugin.AzurePushNotification
         {
             add
             {
+                var previousVal = _onNotificationOpened;
                 _onNotificationOpened += value;
+                if (delayedNotificationResponse != null && previousVal == null)
+                {
+                    var tmpParams = delayedNotificationResponse;
+                    _onNotificationOpened?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationResponseEventArgs(tmpParams.Data, tmpParams.Identifier, tmpParams.Type));
+                    delayedNotificationResponse = null;
+                }
             }
             remove
             {
@@ -171,36 +178,55 @@ namespace Plugin.AzurePushNotification
                 _onNotificationDeleted -= value;
             }
         }
-        public static async Task Initialize(string notificationHubConnectionString, string notificationHubPath, NSDictionary options, bool autoRegistration = true)
+        public static void Initialize(string notificationHubConnectionString, string notificationHubPath, NSDictionary options, bool autoRegistration = true, bool enableDelayedResponse = true)
         {
+           
             Hub = new SBNotificationHub(notificationHubConnectionString, notificationHubPath);
-
+            TokenKey = new NSString($"{notificationHubPath}_Token");
+            PushRegisteredKey = $"{notificationHubPath}_PushRegistered";
             CrossAzurePushNotification.Current.NotificationHandler = CrossAzurePushNotification.Current.NotificationHandler ?? new DefaultPushNotificationHandler();
+
+            if (options?.ContainsKey(UIApplication.LaunchOptionsRemoteNotificationKey) ?? false)
+            {
+                var pushPayload = options[UIApplication.LaunchOptionsRemoteNotificationKey] as NSDictionary;
+                if (pushPayload != null)
+                {
+                    var parameters = GetParameters(pushPayload);
+
+                    var notificationResponse = new NotificationResponse(parameters, string.Empty, NotificationCategoryType.Default);
+
+                    if (_onNotificationOpened == null && enableDelayedResponse)
+                        delayedNotificationResponse = notificationResponse;
+                    else
+                        _onNotificationOpened?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationResponseEventArgs(notificationResponse.Data, notificationResponse.Identifier, notificationResponse.Type));
+
+                    CrossAzurePushNotification.Current.NotificationHandler?.OnOpened(notificationResponse);
+                }
+            }
 
             if (autoRegistration)
             {
-                await CrossAzurePushNotification.Current.RegisterForPushNotifications();
+                 CrossAzurePushNotification.Current.RegisterForPushNotifications();
             }
 
 
         }
 
-        public static async Task Initialize(string notificationHubConnectionString, string notificationHubPath, NSDictionary options, IPushNotificationHandler pushNotificationHandler, bool autoRegistration = true)
+        public static void Initialize(string notificationHubConnectionString, string notificationHubPath, NSDictionary options, IPushNotificationHandler pushNotificationHandler, bool autoRegistration = true, bool enableDelayedResponse = true)
         {
             CrossAzurePushNotification.Current.NotificationHandler = pushNotificationHandler;
-            await Initialize(notificationHubConnectionString, notificationHubPath, options, autoRegistration);
+            Initialize(notificationHubConnectionString, notificationHubPath, options, autoRegistration, enableDelayedResponse);
         }
-        public static async Task Initialize(string notificationHubConnectionString, string notificationHubPath, NSDictionary options, NotificationUserCategory[] notificationUserCategories, bool autoRegistration = true)
+        public static void Initialize(string notificationHubConnectionString, string notificationHubPath, NSDictionary options, NotificationUserCategory[] notificationUserCategories, bool autoRegistration = true, bool enableDelayedResponse = true)
         {
 
-            await Initialize(notificationHubConnectionString, notificationHubPath, options, autoRegistration);
+            Initialize(notificationHubConnectionString, notificationHubPath, options, autoRegistration, enableDelayedResponse);
             RegisterUserNotificationCategories(notificationUserCategories);
 
         }
 
-        public async Task RegisterForPushNotifications()
+        public void RegisterForPushNotifications()
         {
-            TaskCompletionSource<bool> permisionTask = new TaskCompletionSource<bool>();
 
             // Register your app for remote notifications.
             if (UIDevice.CurrentDevice.CheckSystemVersion(10, 0))
@@ -208,23 +234,24 @@ namespace Plugin.AzurePushNotification
                 // iOS 10 or later
                 var authOptions = UNAuthorizationOptions.Alert | UNAuthorizationOptions.Badge | UNAuthorizationOptions.Sound;
 
-
                 // For iOS 10 display notification (sent via APNS)
                 UNUserNotificationCenter.Current.Delegate = CrossAzurePushNotification.Current as IUNUserNotificationCenterDelegate;
 
                 UNUserNotificationCenter.Current.RequestAuthorization(authOptions, (granted, error) =>
                 {
                     if (error != null)
+                    {
                         _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.PermissionDenied, error.Description));
+                    }
                     else if (!granted)
+                    {
                         _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.PermissionDenied, "Push notification permission not granted"));
-
-
-                    permisionTask.SetResult(granted);
+                    }
+                    else
+                    {
+                        this.InvokeOnMainThread(() => UIApplication.SharedApplication.RegisterForRemoteNotifications());
+                    }
                 });
-
-
-
             }
             else
             {
@@ -232,14 +259,6 @@ namespace Plugin.AzurePushNotification
                 var allNotificationTypes = UIUserNotificationType.Alert | UIUserNotificationType.Badge | UIUserNotificationType.Sound;
                 var settings = UIUserNotificationSettings.GetSettingsForTypes(allNotificationTypes, null);
                 UIApplication.SharedApplication.RegisterUserNotificationSettings(settings);
-                permisionTask.SetResult(true);
-            }
-
-
-            var permissonGranted = await permisionTask.Task;
-
-            if (permissonGranted)
-            {
                 UIApplication.SharedApplication.RegisterForRemoteNotifications();
             }
         }
@@ -247,7 +266,7 @@ namespace Plugin.AzurePushNotification
         public void UnregisterForPushNotifications()
         {
             UIApplication.SharedApplication.UnregisterForRemoteNotifications();
-            NSUserDefaults.StandardUserDefaults.SetString(string.Empty, TokenKey);
+            Token = string.Empty;
         }
 
         static void RegisterUserNotificationCategories(NotificationUserCategory[] userCategories)
@@ -329,19 +348,22 @@ namespace Plugin.AzurePushNotification
             await Task.Run(() =>
             {
                 System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Register - Token {InternalToken}");
-                if (InternalToken != null && InternalToken.Length > 0)
+                if (DeviceToken != null || DeviceToken.Length > 0)
                 {
                     NSError errorFirst;
-
-                    Hub.UnregisterAll(InternalToken, out errorFirst);
-
-                    if (errorFirst != null)
+                    if (IsRegistered && InternalToken != null || InternalToken.Length > 0)
                     {
-                        _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.NotificationHubUnregistrationFailed, errorFirst.Description));
-                        System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Unregister- Error - {errorFirst.Description}");
+                        Hub.UnregisterAll(InternalToken, out errorFirst);
 
-                        return;
+                        if (errorFirst != null)
+                        {
+                            _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.NotificationHubUnregistrationFailed, errorFirst.Description));
+                            System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Unregister- Error - {errorFirst.Description}");
+
+                            return;
+                        }
                     }
+
                     NSSet tagSet = null;
                     if (tags != null && tags.Length > 0)
                     {
@@ -350,7 +372,7 @@ namespace Plugin.AzurePushNotification
 
                     NSError error;
 
-                    Hub.RegisterNative(InternalToken, tagSet, out error);
+                    Hub.RegisterNative(DeviceToken, tagSet, out error);
 
                     if (error != null)
                     {
@@ -362,7 +384,7 @@ namespace Plugin.AzurePushNotification
                     {
                         System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Registered - ${tags}");
 
-                        NSUserDefaults.StandardUserDefaults.SetBool(true, RegisteredKey);
+                        NSUserDefaults.StandardUserDefaults.SetBool(true, PushRegisteredKey);
                         NSUserDefaults.StandardUserDefaults.SetValueForKey(_tags ?? new NSArray().MutableCopy(), TagsKey);
                         NSUserDefaults.StandardUserDefaults.Synchronize();
                     }
@@ -393,7 +415,7 @@ namespace Plugin.AzurePushNotification
                     else
                     {
                         _tags = new NSArray().MutableCopy() as NSMutableArray;
-                        NSUserDefaults.StandardUserDefaults.SetBool(false, RegisteredKey);
+                        NSUserDefaults.StandardUserDefaults.SetBool(false, PushRegisteredKey);
                         NSUserDefaults.StandardUserDefaults.SetValueForKey(_tags, TagsKey);
                         NSUserDefaults.StandardUserDefaults.Synchronize();
                     }
@@ -461,14 +483,29 @@ namespace Plugin.AzurePushNotification
 
         public static async void DidRegisterRemoteNotifications(NSData deviceToken)
         {
-            InternalToken = deviceToken;
 
-            NSUserDefaults.StandardUserDefaults.SetBool(true, EnabledKey);
-            NSUserDefaults.StandardUserDefaults.Synchronize();
+            DeviceToken = deviceToken;
 
-            _onTokenRefresh?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationTokenEventArgs(CrossAzurePushNotification.Current.Token));
+            var length = (int)deviceToken.Length;
+            if (length == 0)
+            {
+                return;
+            }
+
+            var hex = new StringBuilder(length * 2);
+            foreach (var b in deviceToken)
+            {
+                hex.AppendFormat("{0:x2}", b);
+            }
+
+            var cleanedDeviceToken = hex.ToString();
+           
+            _onTokenRefresh?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationTokenEventArgs(cleanedDeviceToken));
 
             await CrossAzurePushNotification.Current.RegisterAsync(CrossAzurePushNotification.Current.Tags);
+
+            InternalSaveToken(cleanedDeviceToken);
+            InternalToken = deviceToken;
         }
 
         public static void DidReceiveMessage(NSDictionary data)
@@ -483,8 +520,6 @@ namespace Plugin.AzurePushNotification
 
         public static void RemoteNotificationRegistrationFailed(NSError error)
         {
-            NSUserDefaults.StandardUserDefaults.SetBool(false, EnabledKey);
-            NSUserDefaults.StandardUserDefaults.Synchronize();
 
             _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.RegistrationFailed, error.Description));
         }

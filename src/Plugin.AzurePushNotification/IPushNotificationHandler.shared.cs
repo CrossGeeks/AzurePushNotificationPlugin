@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 
-namespace Plugin.AzurePushNotification.Abstractions
+namespace Plugin.AzurePushNotification
 {
     public interface IPushNotificationHandler
     {

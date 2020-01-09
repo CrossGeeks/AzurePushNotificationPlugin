@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 
 using Foundation;
-using Plugin.AzurePushNotification.Abstractions;
 using UIKit;
 
 namespace Plugin.AzurePushNotification

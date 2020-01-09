@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Plugin.AzurePushNotification.Abstractions
+namespace Plugin.AzurePushNotification
 {
     public enum NotificationPriority
     {

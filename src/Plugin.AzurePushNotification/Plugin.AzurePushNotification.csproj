@@ -1,21 +1,80 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="MSBuild.Sdk.Extras/2.0.41">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;MonoAndroid90;Xamarin.iOS10;</TargetFrameworks>
     <AssemblyName>Plugin.AzurePushNotification</AssemblyName>
     <RootNamespace>Plugin.AzurePushNotification</RootNamespace>
+    <PackageId>Plugin.AzurePushNotification</PackageId>
+    <Product>$(AssemblyName) ($(TargetFramework))</Product>
+    <AssemblyVersion>2.0.0</AssemblyVersion>
+    <AssemblyFileVersion>2.0.0</AssemblyFileVersion>
+    <Version>2.0.0</Version>
+    <PackOnBuild>true</PackOnBuild>
+    <NeutralLanguage>en</NeutralLanguage>
+    <LangVersion>default</LangVersion>
+    <DefineConstants>$(DefineConstants);</DefineConstants>
+
+    <UseFullSemVerForNuGet>false</UseFullSemVerForNuGet>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+
+    <LangVersion>latest</LangVersion>
+    <PackageLicenseUrl>https://github.com/CrossGeeks/AzurePushNotificationPlugin/blob/master/LICENSE.md</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/CrossGeeks/AzurePushNotificationPlugin</PackageProjectUrl>
+    <PackageIconUrl>https://github.com/CrossGeeks/AzurePushNotificationPlugin/blob/master/art/icon.png?raw=true</PackageIconUrl>
+    <RepositoryUrl>https://github.com/CrossGeeks/AzurePushNotificationPlugin</RepositoryUrl>
+    <PackageTags>iOS,Android,azure,notifications hub,push notifications,xamarin,plugins,fcm,apn</PackageTags>
+
+    <Title>Azure Push Notification Plugin for Xamarin</Title>
+    <Summary>Receive and handle azure push notifications across Xamarin.iOS and Xamarin.Android</Summary>
+    <Description>Receive and handle azure push notifications across Xamarin.iOS and Xamarin.Android</Description>
+    <PackageReleaseNotes>[Fix] iOS 13 fix and dependencies upgraded</PackageReleaseNotes>
+    <Owners>crossgeeks,rdelrosario</Owners>
+    <Authors>Rendy Del Rosario</Authors>
+    <Copyright>Copyright 2017 CrossGeeks</Copyright>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netstandard1.0\Plugin.AzurePushNotification.xml</DocumentationFile>
-    <DebugType>none</DebugType>
-    <DebugSymbols>False</DebugSymbols>
+    <!-- Define what happens on build and release -->
+   <PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
 
-  <Import Project="..\Plugin.AzurePushNotification.Shared\Plugin.AzurePushNotification.Shared.projitems" Label="Shared" />
+  <PropertyGroup Condition=" '$(Configuration)'=='Release' ">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <DebugType>pdbonly</DebugType>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NoWarn>1701;1702;1591</NoWarn>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Plugin.AzurePushNotification.xml</DocumentationFile>
+    <Company>Rendy Del Rosario</Company>
+  </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Plugin.AzurePushNotification.Abstractions\Plugin.AzurePushNotification.Abstractions.csproj" />
+    <Compile Include="**\*.shared.cs" />
+    <Compile Include="**\*.shared.*.cs" />
   </ItemGroup>
 
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
+  </ItemGroup>
+
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
+    <PackageReference Include="Xamarin.Android.Support.v4" Version="28.0.0.3" />
+    <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="28.0.0.3" />
+    <PackageReference Include="Xamarin.Azure.NotificationHubs.Android" Version="0.6.0" />
+    <PackageReference Include="Xamarin.Firebase.Messaging" Version="71.1740.0" />
+    <PackageReference Include="Xamarin.GooglePlayServices.Basement" Version="71.1620.0" />
+    <PackageReference Include="Xamarin.GooglePlayServices.Tasks" Version="71.1601.0" />
+    <Compile Include="**\*.android.cs" />
+    <Compile Include="**\*.android.*.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
+    <PackageReference Include="Xamarin.Azure.NotificationHubs.iOS" Version="2.0.4" />
+    <Compile Include="**\*.apple.cs" />
+    <Compile Include="**\*.apple.*.cs" />
+  </ItemGroup>
 </Project>
