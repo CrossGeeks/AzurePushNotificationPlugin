@@ -6,7 +6,7 @@ Simple cross platform plugin for handling azure notification hub push notificati
 
 ### Setup
 * Available on NuGet: http://www.nuget.org/packages/Plugin.AzurePushNotification [![NuGet](https://img.shields.io/nuget/v/Plugin.AzurePushNotification.svg?label=NuGet)](https://www.nuget.org/packages/Plugin.AzurePushNotification/)
-* Install into your PCL project and Client projects.
+* Install into your .NETStandard project and Client projects.
 
 **Platform Support**
 
@@ -17,7 +17,7 @@ Simple cross platform plugin for handling azure notification hub push notificati
 
 ### API Usage
 
-Call **CrossAzurePushNotification.Current** from any project or PCL to gain access to APIs.
+Call **CrossAzurePushNotification.Current** from any project to gain access to APIs.
 
 ## Features
 
