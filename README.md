@@ -1,4 +1,7 @@
 ## Azure Push Notification Plugin for Xamarin iOS and Android
+
+[![Build Status](https://dev.azure.com/CrossGeeks/Plugins/_apis/build/status/AzurePushNotification%20Plugin%20CI%20Pipeline?branchName=master)](https://dev.azure.com/CrossGeeks/Plugins/_build/latest?definitionId=10&branchName=master)
+
 Simple cross platform plugin for handling azure notification hub push notifications.
 
 ### Setup
