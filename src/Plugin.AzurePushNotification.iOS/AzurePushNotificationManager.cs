@@ -2,8 +2,8 @@ using Foundation;
 using Plugin.AzurePushNotification.Abstractions;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using UIKit;
 using UserNotifications;
@@ -16,7 +16,7 @@ namespace Plugin.AzurePushNotification
     /// </summary>
     public class AzurePushNotificationManager : NSObject, IAzurePushNotification, IUNUserNotificationCenterDelegate
     {
-      
+
         static NSString TagsKey = new NSString("Tags");
         static NSString TokenKey = new NSString("Token");
         static NSString EnabledKey = new NSString("Enabled");
@@ -29,14 +29,14 @@ namespace Plugin.AzurePushNotification
             {
                 //Load all subscribed topics
                 IList<string> topics = new List<string>();
-                if(_tags!=null)
+                if (_tags != null)
                 {
                     for (nuint i = 0; i < _tags.Count; i++)
                     {
                         topics.Add(_tags.GetItem<NSString>(i));
                     }
                 }
-               
+
                 return topics.ToArray();
             }
 
@@ -46,12 +46,27 @@ namespace Plugin.AzurePushNotification
             get
             {
                 string trimmedDeviceToken = InternalToken?.Description;
+
                 if (!string.IsNullOrWhiteSpace(trimmedDeviceToken))
                 {
-                    trimmedDeviceToken = trimmedDeviceToken.Trim('<');
-                    trimmedDeviceToken = trimmedDeviceToken.Trim('>');
-                    trimmedDeviceToken = trimmedDeviceToken.Trim();
-                    trimmedDeviceToken = trimmedDeviceToken.Replace(" ", "");
+                    if (trimmedDeviceToken.StartsWith("<"))
+                    {
+                        trimmedDeviceToken = trimmedDeviceToken.Trim('<');
+                        trimmedDeviceToken = trimmedDeviceToken.Trim('>');
+                        trimmedDeviceToken = trimmedDeviceToken.Trim();
+                        trimmedDeviceToken = trimmedDeviceToken.Replace(" ", "");
+                    }
+                    else if (InternalToken != null) // iOS sdk 13
+                    {
+                        var token = InternalToken.ToArray();
+                        var hexToken = new StringBuilder(token.Length * 2);
+                        foreach (var b in token)
+                        {
+                            hexToken.AppendFormat("{0:x2}", b);
+                        }
+
+                        trimmedDeviceToken = hexToken.ToString();
+                    }
                 }
 
                 return trimmedDeviceToken ?? string.Empty;
@@ -64,8 +79,8 @@ namespace Plugin.AzurePushNotification
 
 
         static SBNotificationHub Hub { get; set; }
-  
-    
+
+
         public static NSData InternalToken
         {
             get
@@ -78,7 +93,7 @@ namespace Plugin.AzurePushNotification
                 NSUserDefaults.StandardUserDefaults.Synchronize();
             }
         }
-        
+
         public IPushNotificationHandler NotificationHandler { get; set; }
 
         public static UNNotificationPresentationOptions CurrentNotificationPresentationOption { get; set; } = UNNotificationPresentationOptions.None;
@@ -156,29 +171,29 @@ namespace Plugin.AzurePushNotification
                 _onNotificationDeleted -= value;
             }
         }
-        public static async Task Initialize(string notificationHubConnectionString, string notificationHubPath, NSDictionary options,bool autoRegistration =true)
+        public static async Task Initialize(string notificationHubConnectionString, string notificationHubPath, NSDictionary options, bool autoRegistration = true)
         {
             Hub = new SBNotificationHub(notificationHubConnectionString, notificationHubPath);
 
             CrossAzurePushNotification.Current.NotificationHandler = CrossAzurePushNotification.Current.NotificationHandler ?? new DefaultPushNotificationHandler();
 
-            if(autoRegistration)
+            if (autoRegistration)
             {
                 await CrossAzurePushNotification.Current.RegisterForPushNotifications();
             }
-          
+
 
         }
 
         public static async Task Initialize(string notificationHubConnectionString, string notificationHubPath, NSDictionary options, IPushNotificationHandler pushNotificationHandler, bool autoRegistration = true)
         {
             CrossAzurePushNotification.Current.NotificationHandler = pushNotificationHandler;
-            await Initialize(notificationHubConnectionString, notificationHubPath,options,autoRegistration);
+            await Initialize(notificationHubConnectionString, notificationHubPath, options, autoRegistration);
         }
-        public static async Task Initialize(string notificationHubConnectionString, string notificationHubPath,NSDictionary options, NotificationUserCategory[] notificationUserCategories, bool autoRegistration = true)
+        public static async Task Initialize(string notificationHubConnectionString, string notificationHubPath, NSDictionary options, NotificationUserCategory[] notificationUserCategories, bool autoRegistration = true)
         {
 
-            await Initialize(notificationHubConnectionString, notificationHubPath, options,autoRegistration);
+            await Initialize(notificationHubConnectionString, notificationHubPath, options, autoRegistration);
             RegisterUserNotificationCategories(notificationUserCategories);
 
         }
@@ -294,7 +309,7 @@ namespace Plugin.AzurePushNotification
 
         }
 
-        
+
         public async Task RegisterAsync(string[] tags)
         {
             System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Register - Start");
@@ -314,7 +329,7 @@ namespace Plugin.AzurePushNotification
             await Task.Run(() =>
             {
                 System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Register - Token {InternalToken}");
-                if (InternalToken!=null && InternalToken.Length > 0)
+                if (InternalToken != null && InternalToken.Length > 0)
                 {
                     NSError errorFirst;
 
@@ -322,17 +337,17 @@ namespace Plugin.AzurePushNotification
 
                     if (errorFirst != null)
                     {
-                        _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.NotificationHubUnregistrationFailed,errorFirst.Description));
+                        _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.NotificationHubUnregistrationFailed, errorFirst.Description));
                         System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Unregister- Error - {errorFirst.Description}");
 
                         return;
                     }
                     NSSet tagSet = null;
-                    if (tags !=null && tags.Length>0)
+                    if (tags != null && tags.Length > 0)
                     {
                         tagSet = new NSSet(tags);
                     }
-             
+
                     NSError error;
 
                     Hub.RegisterNative(InternalToken, tagSet, out error);
@@ -340,7 +355,7 @@ namespace Plugin.AzurePushNotification
                     if (error != null)
                     {
                         System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Register- Error - {error.Description}");
-                        _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.NotificationHubRegistrationFailed,error.Description));
+                        _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.NotificationHubRegistrationFailed, error.Description));
 
                     }
                     else
@@ -348,7 +363,7 @@ namespace Plugin.AzurePushNotification
                         System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Registered - ${tags}");
 
                         NSUserDefaults.StandardUserDefaults.SetBool(true, RegisteredKey);
-                        NSUserDefaults.StandardUserDefaults.SetValueForKey(_tags?? new NSArray().MutableCopy(), TagsKey);
+                        NSUserDefaults.StandardUserDefaults.SetValueForKey(_tags ?? new NSArray().MutableCopy(), TagsKey);
                         NSUserDefaults.StandardUserDefaults.Synchronize();
                     }
                 }
@@ -372,7 +387,7 @@ namespace Plugin.AzurePushNotification
 
                     if (error != null)
                     {
-                        _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.NotificationHubUnregistrationFailed,error.Description));
+                        _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.NotificationHubUnregistrationFailed, error.Description));
                         System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Unregister- Error - {error.Description}");
                     }
                     else
@@ -385,7 +400,7 @@ namespace Plugin.AzurePushNotification
                 }
                 catch (Exception ex)
                 {
-                    _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.NotificationHubUnregistrationFailed,ex.Message));
+                    _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.NotificationHubUnregistrationFailed, ex.Message));
                     System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Unregister- Error - {ex.Message}");
                 }
 
@@ -471,7 +486,7 @@ namespace Plugin.AzurePushNotification
             NSUserDefaults.StandardUserDefaults.SetBool(false, EnabledKey);
             NSUserDefaults.StandardUserDefaults.Synchronize();
 
-            _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.RegistrationFailed,error.Description));
+            _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.RegistrationFailed, error.Description));
         }
 
         static IDictionary<string, object> GetParameters(NSDictionary data)

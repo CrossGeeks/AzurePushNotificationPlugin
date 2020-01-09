@@ -85,6 +85,8 @@ Android on **Application** class **OnCreate** method:
 ```csharp
 #if DEBUG
   AzurePushNotificationManager.Initialize(this,
+                "Notification Hub Connection String",
+                "Notification Hub Path Name",
                 new NotificationUserCategory[]
                 {
                     new NotificationUserCategory("message",new List<NotificationUserAction> {
@@ -99,6 +101,8 @@ Android on **Application** class **OnCreate** method:
                 }, true);
 #else
   AzurePushNotificationManager.Initialize(this,
+                "Notification Hub Connection String",
+                "Notification Hub Path Name",
                 new NotificationUserCategory[]
                 {
                     new NotificationUserCategory("message",new List<NotificationUserAction> {
@@ -119,17 +123,20 @@ iOS on **AppDelegate** FinishLaunching:
 
 ```csharp
 
-  AzurePushNotificationManager.Initialize(options, new NotificationUserCategory[]
-  {
-                new NotificationUserCategory("message",new List<NotificationUserAction> {
-                    new NotificationUserAction("Reply","Reply",NotificationActionType.Foreground)
-                }),
-                new NotificationUserCategory("request",new List<NotificationUserAction> {
-                    new NotificationUserAction("Accept","Accept"),
-                    new NotificationUserAction("Reject","Reject",NotificationActionType.Destructive)
-                })
-
-   });
+  AzurePushNotificationManager.Initialize(
+                "Notification Hub Connection String",
+                "Notification Hub Path Name",
+                options, 
+                new NotificationUserCategory[]
+                {
+                   new NotificationUserCategory("message",new List<NotificationUserAction> {
+                       new NotificationUserAction("Reply","Reply",NotificationActionType.Foreground)
+                   }),
+                   new NotificationUserCategory("request",new List<NotificationUserAction> {
+                       new NotificationUserAction("Accept","Accept"),
+                       new NotificationUserAction("Reject","Reject",NotificationActionType.Destructive)
+                   })
+               });
    
 ```
 
