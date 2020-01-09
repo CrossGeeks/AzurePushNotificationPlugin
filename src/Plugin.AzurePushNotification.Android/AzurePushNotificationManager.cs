@@ -440,6 +440,32 @@ namespace Plugin.AzurePushNotification
             });
         }
 
+        public void ClearAllNotifications()
+        {
+            NotificationManager manager = Application.Context.GetSystemService(Context.NotificationService) as NotificationManager;
+            manager.CancelAll();
+        }
+
+        public void RemoveNotification(int id)
+        {
+            NotificationManager manager = Application.Context.GetSystemService(Context.NotificationService) as NotificationManager;
+            manager.Cancel(id);
+        }
+
+        public void RemoveNotification(string tag, int id)
+        {
+            if (string.IsNullOrEmpty(tag))
+            {
+                RemoveNotification(id);
+            }
+            else
+            {
+                NotificationManager manager = Application.Context.GetSystemService(Context.NotificationService) as NotificationManager;
+                manager.Cancel(tag, id);
+            }
+
+        }
+
         #region internal methods
         //Raises event for push notification token refresh
         internal static async void RegisterToken(string token)

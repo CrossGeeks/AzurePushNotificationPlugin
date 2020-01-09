@@ -139,5 +139,20 @@ namespace Plugin.AzurePushNotification.Abstractions
         /// Indicates if is registered in notification hub
         /// </summary>
         bool IsRegistered { get; }
+
+        /// <summary>
+        /// Clear all notifications
+        /// </summary>
+        void ClearAllNotifications();
+
+        /// <summary>
+        /// Remove specific id notification
+        /// </summary>
+        void RemoveNotification(int id);
+
+        /// <summary>
+        /// Remove specific id and tag notification
+        /// </summary>
+        void RemoveNotification(string tag, int id);
     }
 }

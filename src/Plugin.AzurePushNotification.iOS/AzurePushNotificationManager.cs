@@ -403,6 +403,23 @@ namespace Plugin.AzurePushNotification
             var parameters = GetParameters(notification.Request.Content.UserInfo);
             _onNotificationReceived?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationDataEventArgs(parameters));
             //CrossPushNotification.Current.NotificationHandler?.OnReceived(parameters);
+            if ((parameters.TryGetValue("priority", out object priority) && ($"{priority}".ToLower() == "high" || $"{priority}".ToLower() == "max")))
+            {
+                if (!CurrentNotificationPresentationOption.HasFlag(UNNotificationPresentationOptions.Alert))
+                {
+                    CurrentNotificationPresentationOption |= UNNotificationPresentationOptions.Alert;
+
+                }
+            }
+            else
+            {
+                if (CurrentNotificationPresentationOption.HasFlag(UNNotificationPresentationOptions.Alert))
+                {
+                    CurrentNotificationPresentationOption &= ~UNNotificationPresentationOptions.Alert;
+
+                }
+            }
+
             completionHandler(CurrentNotificationPresentationOption);
         }
 
@@ -502,7 +519,47 @@ namespace Plugin.AzurePushNotification
 
             return parameters;
         }
+        public void ClearAllNotifications()
+        {
+            if (UIDevice.CurrentDevice.CheckSystemVersion(10, 0))
+            {
+                UNUserNotificationCenter.Current.RemoveAllDeliveredNotifications(); // To remove all delivered notifications
+            }
+            else
+            {
+                UIApplication.SharedApplication.CancelAllLocalNotifications();
+            }
+        }
+        public async void RemoveNotification(string tag, int id)
+        {
+            RemoveNotification(id);
+        }
+        public async void RemoveNotification(int id)
+        {
+            string NotificationIdKey = "id";
+            if (UIDevice.CurrentDevice.CheckSystemVersion(10, 0))
+            {
 
+                var deliveredNotifications = await UNUserNotificationCenter.Current.GetDeliveredNotificationsAsync();
+                var deliveredNotificationsMatches = deliveredNotifications.Where(u => $"{u.Request.Content.UserInfo[NotificationIdKey]}".Equals($"{id}")).Select(s => s.Request.Identifier).ToArray();
+                if (deliveredNotificationsMatches.Length > 0)
+                {
+                    UNUserNotificationCenter.Current.RemoveDeliveredNotifications(deliveredNotificationsMatches);
+
+                }
+            }
+            else
+            {
+                var scheduledNotifications = UIApplication.SharedApplication.ScheduledLocalNotifications.Where(u => u.UserInfo[NotificationIdKey].Equals($"{id}"));
+                //  var notification = notifications.Where(n => n.UserInfo.ContainsKey(NSObject.FromObject(NotificationKey)))  
+                //         .FirstOrDefault(n => n.UserInfo[NotificationKey].Equals(NSObject.FromObject(id)));
+                foreach (var notification in scheduledNotifications)
+                {
+                    UIApplication.SharedApplication.CancelLocalNotification(notification);
+                }
+
+            }
+        }
 
     }
 }
