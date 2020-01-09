@@ -1,4 +1,4 @@
-﻿{
+{
   "project_info": {
     "project_number": "834212238609",
     "firebase_url": "https://azurepushnotificationsample.firebaseio.com",
@@ -25,15 +25,13 @@
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
+          "other_platform_oauth_client": [
+            {
+              "client_id": "834212238609-qeum216pk7l59g199o44gdmj39qjhehm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
