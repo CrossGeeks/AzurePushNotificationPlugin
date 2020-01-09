@@ -17,7 +17,7 @@ Simple cross platform plugin for handling azure notification hub push notificati
 
 ### API Usage
 
-Call **CrossAzurePushNotification.Current** from any project or PCL to gain access to APIs.
+Call **CrossAzurePushNotification.Current** from any project to gain access to APIs.
 
 ## Features
 
