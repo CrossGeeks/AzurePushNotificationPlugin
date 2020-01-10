@@ -438,7 +438,7 @@ namespace Plugin.AzurePushNotification
             System.Diagnostics.Debug.WriteLine("WillPresentNotification");
             var parameters = GetParameters(notification.Request.Content.UserInfo);
             _onNotificationReceived?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationDataEventArgs(parameters));
-            //CrossPushNotification.Current.NotificationHandler?.OnReceived(parameters);
+            CrossAzurePushNotification.Current.NotificationHandler?.OnReceived(parameters);
             if ((parameters.TryGetValue("priority", out object priority) && ($"{priority}".ToLower() == "high" || $"{priority}".ToLower() == "max")))
             {
                 if (!CurrentNotificationPresentationOption.HasFlag(UNNotificationPresentationOptions.Alert))
