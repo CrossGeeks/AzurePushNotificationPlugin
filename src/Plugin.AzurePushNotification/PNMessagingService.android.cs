@@ -58,7 +58,26 @@ namespace Plugin.AzurePushNotification
             foreach (var d in message.Data)
             {
                 if (!parameters.ContainsKey(d.Key))
-                    parameters.Add(d.Key, d.Value);
+                {
+                    if((d.Key.Equals("title_loc_args") || d.Key.Equals("body_loc_args")))
+                    {
+                        if(d.Value.StartsWith("[") && d.Value.EndsWith("]") && d.Value.Length > 2)
+                        {
+                            var arrayValues = d.Value.Substring(1, d.Value.Length - 2);
+                            parameters.Add(d.Key, arrayValues.Split(","));
+                        }
+                        else
+                        {
+                            parameters.Add(d.Key, new string[] { });
+                        }
+                    
+                    }
+                    else
+                    {
+                        parameters.Add(d.Key, d.Value);
+                    }
+                }
+                  
             }
 
             AzurePushNotificationManager.RegisterData(parameters);
