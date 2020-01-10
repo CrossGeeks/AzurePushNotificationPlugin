@@ -4,23 +4,6 @@
 
 First, make sure you setup everthing on Firebase portal and Azure portal.
 
-Edit AndroidManifest.xml and insert the following receiver elements **inside** the **application** section:
-
-```xml
-<receiver 
-    android:name="com.google.firebase.iid.FirebaseInstanceIdInternalReceiver" 
-    android:exported="false" />
-<receiver 
-    android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver" 
-    android:exported="true" 
-    android:permission="com.google.android.c2dm.permission.SEND">
-    <intent-filter>
-        <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-        <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
-        <category android:name="${applicationId}" />
-    </intent-filter>
-</receiver>
-```
 Also add this permission:
 
 ```xml
