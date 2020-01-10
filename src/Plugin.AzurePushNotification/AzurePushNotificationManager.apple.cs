@@ -351,7 +351,7 @@ namespace Plugin.AzurePushNotification
             await Task.Run(() =>
             {
                     NSError errorFirst;
-                    if (InternalToken != null || InternalToken.Length > 0 && IsRegistered)
+                    if ((InternalToken != null && InternalToken.Length > 0) && IsRegistered)
                     {
                         Hub.UnregisterAll(InternalToken, out errorFirst);
 
