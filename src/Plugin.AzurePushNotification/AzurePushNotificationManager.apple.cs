@@ -439,22 +439,47 @@ namespace Plugin.AzurePushNotification
             var parameters = GetParameters(notification.Request.Content.UserInfo);
             _onNotificationReceived?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationDataEventArgs(parameters));
             CrossAzurePushNotification.Current.NotificationHandler?.OnReceived(parameters);
-            if ((parameters.TryGetValue("priority", out object priority) && ($"{priority}".ToLower() == "high" || $"{priority}".ToLower() == "max")))
-            {
-                if (!CurrentNotificationPresentationOption.HasFlag(UNNotificationPresentationOptions.Alert))
-                {
-                    CurrentNotificationPresentationOption |= UNNotificationPresentationOptions.Alert;
 
+            string[] priorityKeys = new string[] { "priority", "aps.priority" };
+
+
+            foreach(var pKey in priorityKeys)
+            {
+                if(parameters.TryGetValue(pKey, out object priority))
+                {
+                    var priorityValue = $"{priority}".ToLower();
+                    switch(priorityValue)
+                    {
+                        case "max":
+                        case "high":
+                            if (!CurrentNotificationPresentationOption.HasFlag(UNNotificationPresentationOptions.Alert))
+                            {
+                                CurrentNotificationPresentationOption |= UNNotificationPresentationOptions.Alert;
+
+                            }
+
+                            if (!CurrentNotificationPresentationOption.HasFlag(UNNotificationPresentationOptions.Sound))
+                            {
+                                CurrentNotificationPresentationOption |= UNNotificationPresentationOptions.Sound;
+
+                            }
+                            break;
+                        case "low":
+                        case "min":
+                        case "default":
+                        default:
+                            if (CurrentNotificationPresentationOption.HasFlag(UNNotificationPresentationOptions.Alert))
+                            {
+                                CurrentNotificationPresentationOption &= ~UNNotificationPresentationOptions.Alert;
+
+                            }
+                            break;
+                    }
+
+                    break;
                 }
             }
-            else
-            {
-                if (CurrentNotificationPresentationOption.HasFlag(UNNotificationPresentationOptions.Alert))
-                {
-                    CurrentNotificationPresentationOption &= ~UNNotificationPresentationOptions.Alert;
 
-                }
-            }
 
             completionHandler(CurrentNotificationPresentationOption);
         }
