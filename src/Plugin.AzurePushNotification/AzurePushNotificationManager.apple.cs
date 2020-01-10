@@ -267,6 +267,7 @@ namespace Plugin.AzurePushNotification
         {
             UIApplication.SharedApplication.UnregisterForRemoteNotifications();
             Token = string.Empty;
+            InternalToken = null;
         }
 
         static void RegisterUserNotificationCategories(NotificationUserCategory[] userCategories)
@@ -483,9 +484,6 @@ namespace Plugin.AzurePushNotification
 
         public static async void DidRegisterRemoteNotifications(NSData deviceToken)
         {
-
-            DeviceToken = deviceToken;
-
             var length = (int)deviceToken.Length;
             if (length == 0)
             {
@@ -498,13 +496,16 @@ namespace Plugin.AzurePushNotification
                 hex.AppendFormat("{0:x2}", b);
             }
 
+
             var cleanedDeviceToken = hex.ToString();
-           
+
+            DeviceToken = deviceToken;
+
             _onTokenRefresh?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationTokenEventArgs(cleanedDeviceToken));
 
             await CrossAzurePushNotification.Current.RegisterAsync(CrossAzurePushNotification.Current.Tags);
 
-            InternalSaveToken(cleanedDeviceToken);
+            CrossAzurePushNotification.Current.SaveToken?.Invoke(cleanedDeviceToken);
             InternalToken = deviceToken;
         }
 
