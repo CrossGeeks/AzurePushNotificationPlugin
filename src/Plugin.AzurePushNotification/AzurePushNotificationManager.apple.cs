@@ -345,10 +345,8 @@ namespace Plugin.AzurePushNotification
                 _tags = null;
             }
 
-            System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Register - Tags {tags}");
             await Task.Run(() =>
             {
-                System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Register - Token {InternalToken}");
                 if (DeviceToken != null || DeviceToken.Length > 0)
                 {
                     NSError errorFirst;
@@ -383,7 +381,7 @@ namespace Plugin.AzurePushNotification
                     }
                     else
                     {
-                        System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Registered - ${tags}");
+                        System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Registered - ${_tags}");
 
                         NSUserDefaults.StandardUserDefaults.SetBool(true, PushRegisteredKey);
                         NSUserDefaults.StandardUserDefaults.SetValueForKey(_tags ?? new NSArray().MutableCopy(), TagsKey);
