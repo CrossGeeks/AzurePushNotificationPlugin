@@ -26,9 +26,10 @@ namespace AzurePushNotificationSample.iOS
         {
             global::Xamarin.Forms.Forms.Init();
             LoadApplication(new App());
-           AzurePushNotificationManager.Initialize(AzureConstants.ListenConnectionString, AzureConstants.NotificationHubName, options);
-           AzurePushNotificationManager.CurrentNotificationPresentationOption = UNNotificationPresentationOptions.Alert | UNNotificationPresentationOptions.Badge;
+            AzurePushNotificationManager.CurrentNotificationPresentationOption = UNNotificationPresentationOptions.Alert | UNNotificationPresentationOptions.Sound;
 
+            AzurePushNotificationManager.Initialize(AzureConstants.ListenConnectionString, AzureConstants.NotificationHubName, options);
+          
             return base.FinishedLaunching(app, options);
 
         }

@@ -27,10 +27,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AndroidLinkMode>None</AndroidLinkMode>
-    <AotAssemblies>false</AotAssemblies>
-    <EnableLLVM>false</EnableLLVM>
-    <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
-    <BundleAssemblies>false</BundleAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -51,7 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Plugin.AzurePushNotification">
-      <Version>2.0.9</Version>
+      <Version>2.0.16</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Android.Support.Annotations">
       <Version>28.0.0.3</Version>
@@ -129,7 +125,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AzurePushNotificationSample\AzurePushNotificationSample.csproj">
-      <Project>{AACAA479-67C5-4E3D-B60A-957A9A96DF94}</Project>
+      <Project>{D752C30D-5472-46DE-8256-E959BFF373FD}</Project>
       <Name>AzurePushNotificationSample</Name>
     </ProjectReference>
   </ItemGroup>
