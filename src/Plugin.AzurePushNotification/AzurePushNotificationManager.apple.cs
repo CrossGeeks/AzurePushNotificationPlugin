@@ -345,12 +345,13 @@ namespace Plugin.AzurePushNotification
                 _tags = null;
             }
 
+            if (DeviceToken == null || DeviceToken.Length == 0)
+                return;
+
             await Task.Run(() =>
             {
-                if (DeviceToken != null || DeviceToken.Length > 0)
-                {
                     NSError errorFirst;
-                    if (IsRegistered && InternalToken != null || InternalToken.Length > 0)
+                    if (InternalToken != null || InternalToken.Length > 0 && IsRegistered)
                     {
                         Hub.UnregisterAll(InternalToken, out errorFirst);
 
@@ -387,7 +388,6 @@ namespace Plugin.AzurePushNotification
                         NSUserDefaults.StandardUserDefaults.SetValueForKey(_tags ?? new NSArray().MutableCopy(), TagsKey);
                         NSUserDefaults.StandardUserDefaults.Synchronize();
                     }
-                }
             });
 
         }
