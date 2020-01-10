@@ -186,7 +186,7 @@ namespace Plugin.AzurePushNotification
             PushRegisteredKey = $"{notificationHubPath}_PushRegistered";
             CrossAzurePushNotification.Current.NotificationHandler = CrossAzurePushNotification.Current.NotificationHandler ?? new DefaultPushNotificationHandler();
 
-            if (options?.ContainsKey(UIApplication.LaunchOptionsRemoteNotificationKey) ?? false)
+            /*if (options?.ContainsKey(UIApplication.LaunchOptionsRemoteNotificationKey) ?? false)
             {
                 var pushPayload = options[UIApplication.LaunchOptionsRemoteNotificationKey] as NSDictionary;
                 if (pushPayload != null)
@@ -202,7 +202,7 @@ namespace Plugin.AzurePushNotification
 
                     CrossAzurePushNotification.Current.NotificationHandler?.OnOpened(notificationResponse);
                 }
-            }
+            }*/
 
             if (autoRegistration)
             {
