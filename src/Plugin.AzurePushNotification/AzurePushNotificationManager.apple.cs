@@ -345,14 +345,13 @@ namespace Plugin.AzurePushNotification
                 _tags = null;
             }
 
-            System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Register - Tags {tags}");
+            if (DeviceToken == null || DeviceToken.Length == 0)
+                return;
+
             await Task.Run(() =>
             {
-                System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Register - Token {InternalToken}");
-                if (DeviceToken != null || DeviceToken.Length > 0)
-                {
                     NSError errorFirst;
-                    if (IsRegistered && InternalToken != null || InternalToken.Length > 0)
+                    if ((InternalToken != null && InternalToken.Length > 0) && IsRegistered)
                     {
                         Hub.UnregisterAll(InternalToken, out errorFirst);
 
@@ -383,13 +382,12 @@ namespace Plugin.AzurePushNotification
                     }
                     else
                     {
-                        System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Registered - ${tags}");
+                        System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Registered - ${_tags}");
 
                         NSUserDefaults.StandardUserDefaults.SetBool(true, PushRegisteredKey);
                         NSUserDefaults.StandardUserDefaults.SetValueForKey(_tags ?? new NSArray().MutableCopy(), TagsKey);
                         NSUserDefaults.StandardUserDefaults.Synchronize();
                     }
-                }
             });
 
         }
@@ -440,7 +438,7 @@ namespace Plugin.AzurePushNotification
             System.Diagnostics.Debug.WriteLine("WillPresentNotification");
             var parameters = GetParameters(notification.Request.Content.UserInfo);
             _onNotificationReceived?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationDataEventArgs(parameters));
-            //CrossPushNotification.Current.NotificationHandler?.OnReceived(parameters);
+            CrossAzurePushNotification.Current.NotificationHandler?.OnReceived(parameters);
             if ((parameters.TryGetValue("priority", out object priority) && ($"{priority}".ToLower() == "high" || $"{priority}".ToLower() == "max")))
             {
                 if (!CurrentNotificationPresentationOption.HasFlag(UNNotificationPresentationOptions.Alert))
