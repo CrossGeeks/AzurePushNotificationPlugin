@@ -74,6 +74,7 @@ There are also some keys you can set on the payload:
 * **priority** : Sets the notification priority
 * **sound** : Sets the notification sound
 * **icon** : Sets the notification icon
+* **large_icon** : Sets the notification large icon
 * **click_action** : Sets name for the notification action
 
 If **sound** or **icon** keys present have priority over the **AzurePushNotificationManager.SoundUri** and **AzurePushNotificationManager.IconResource** static customization properties mentioned above.
@@ -213,6 +214,40 @@ Payload sample with icon and sound
 ```
 
 If icon not set will set the **AzurePushNotificationManager.IconResource** value if not set either will use the default application icon.
+
+
+#####  Notification Large Icon
+
+* You can send the large_icon to be displayed on the notification by using **large_icon** key, an icon with the value set should be in your *Resources/drawable* folder.
+
+Payload sample with large icon
+
+```json
+{
+   "data" : {
+     "title": "hello",
+     "body": "world",
+     "priority":"high",
+     "large_icon":"test"
+  }
+}
+```
+
+Payload sample with large icon and sound
+
+```json
+{
+   "data" : {
+     "title": "hello",
+     "body": "world",
+     "priority":"high",
+     "large_icon":"test",
+     "sound":"test"
+  }
+}
+```
+
+If large icon not set will set the **AzurePushNotificationManager.LargeIconResource** value.
 
 
 #####  Notification Actions

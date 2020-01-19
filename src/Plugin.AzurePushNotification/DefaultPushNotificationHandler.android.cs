@@ -99,6 +99,11 @@ namespace Plugin.AzurePushNotification
         public const string IconKey = "icon";
 
         /// <summary>
+        /// Large Icon
+        /// </summary>
+        public const string LargeIconKey = "large_icon";
+
+        /// <summary>
         /// Sound
         /// </summary>
         public const string SoundKey = "sound";
@@ -211,7 +216,11 @@ namespace Plugin.AzurePushNotification
                 {
                     try
                     {
-                        AzurePushNotificationManager.IconResource = context.Resources.GetIdentifier(icon.ToString(), "drawable", Application.Context.PackageName);
+                        AzurePushNotificationManager.IconResource = context.Resources.GetIdentifier($"{icon}", "drawable", Application.Context.PackageName);
+                        if (AzurePushNotificationManager.IconResource == 0)
+                        {
+                            AzurePushNotificationManager.IconResource = context.Resources.GetIdentifier($"{icon}", "mipmap", Application.Context.PackageName);
+                        }
                     }
                     catch (Resources.NotFoundException ex)
                     {
@@ -231,6 +240,30 @@ namespace Plugin.AzurePushNotification
             catch (Resources.NotFoundException ex)
             {
                 AzurePushNotificationManager.IconResource = context.ApplicationInfo.Icon;
+                System.Diagnostics.Debug.WriteLine(ex.ToString());
+            }
+
+            try
+            {
+                if (parameters.TryGetValue(LargeIconKey, out object largeIcon) && largeIcon != null)
+                {
+                    AzurePushNotificationManager.LargeIconResource = context.Resources.GetIdentifier($"{largeIcon}", "drawable", Application.Context.PackageName);
+                    if (AzurePushNotificationManager.LargeIconResource == 0)
+                    {
+                        AzurePushNotificationManager.LargeIconResource = context.Resources.GetIdentifier($"{largeIcon}", "mipmap", Application.Context.PackageName);
+                    }
+                }
+
+                if (AzurePushNotificationManager.LargeIconResource != 0)
+                {
+                    string name = context.Resources.GetResourceName(AzurePushNotificationManager.LargeIconResource);
+                    if (name == null)
+                        AzurePushNotificationManager.LargeIconResource = 0;
+                }
+            }
+            catch (Resources.NotFoundException ex)
+            {
+                AzurePushNotificationManager.LargeIconResource = 0;
                 System.Diagnostics.Debug.WriteLine(ex.ToString());
             }
 
@@ -279,6 +312,11 @@ namespace Plugin.AzurePushNotification
                 .SetAutoCancel(true)
                 .SetContentIntent(pendingIntent);
 
+            if(AzurePushNotificationManager.LargeIconResource != 0)
+            {
+                Bitmap largeIconBitmap = BitmapFactory.DecodeResource(context.Resources, AzurePushNotificationManager.LargeIconResource);
+                notificationBuilder.SetLargeIcon(largeIconBitmap);
+            }
             var deleteIntent = new Intent(context,typeof(PushNotificationDeletedReceiver));
             var pendingDeleteIntent = PendingIntent.GetBroadcast(context, requestCode, deleteIntent,PendingIntentFlags.CancelCurrent);
             notificationBuilder.SetDeleteIntent(pendingDeleteIntent);
