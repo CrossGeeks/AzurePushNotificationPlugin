@@ -111,14 +111,14 @@ namespace Plugin.AzurePushNotification
         /// <summary>
         /// Channel id
         /// </summary>
-        public const string ChannelIdKey = "android_channel_id";
+        public const string ChannelIdKey = "channel_id";
 
-        public void OnOpened(NotificationResponse response)
+        public virtual void OnOpened(NotificationResponse response)
         {
             System.Diagnostics.Debug.WriteLine($"{DomainTag} - OnOpened");
         }
 
-        public void OnReceived(IDictionary<string, object> parameters)
+        public virtual void OnReceived(IDictionary<string, object> parameters)
         {
             System.Diagnostics.Debug.WriteLine($"{DomainTag} - OnReceived");
 
@@ -421,7 +421,7 @@ namespace Plugin.AzurePushNotification
         /// </summary>
         /// <param name="notificationBuilder">Notification builder.</param>
         /// <param name="parameters">Parameters.</param>
-        private void ResolveLocalizedParameters(NotificationCompat.Builder notificationBuilder, IDictionary<string, object> parameters)
+        void ResolveLocalizedParameters(NotificationCompat.Builder notificationBuilder, IDictionary<string, object> parameters)
         {
             string getLocalizedString(string name, params string[] arguments)
             {
@@ -459,7 +459,7 @@ namespace Plugin.AzurePushNotification
             }
         }
 
-        public void OnError(string error)
+        public virtual void OnError(string error)
         {
             System.Diagnostics.Debug.WriteLine($"{DomainTag} - OnError - {error}");
         }
