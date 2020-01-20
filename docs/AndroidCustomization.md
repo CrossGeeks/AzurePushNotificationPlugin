@@ -76,6 +76,7 @@ There are also some keys you can set on the payload:
 * **icon** : Sets the notification icon
 * **large_icon** : Sets the notification large icon
 * **click_action** : Sets name for the notification action
+* **channel_id** : Sets id for the notification channel that will be used when notification is delivered
 
 If **sound** or **icon** keys present have priority over the **AzurePushNotificationManager.SoundUri** and **AzurePushNotificationManager.IconResource** static customization properties mentioned above.
 
