@@ -254,5 +254,22 @@ If large icon not set will set the **AzurePushNotificationManager.LargeIconResou
 
 * For notification with actions will look for **click_action** key value as the match. More information here:  [Notification Actions](NotificationActions.md)
 
+#####  Notification Channel Id
+
+* **channel_id** key is set as the notification channel id if present will use that specified notification channel for this notification.
+
+ Payload sample with id and tag
+
+```json
+{
+   "data" : {
+     "title": "hello",
+     "body": "firebase",
+     "channel_id" : "PushNotificationChannel"
+
+  }
+}
+```
+
 <= Back to [Table of Contents](../README.md)
 
