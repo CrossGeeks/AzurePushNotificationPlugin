@@ -1,7 +1,7 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/2.0.41">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;MonoAndroid90;Xamarin.iOS10;</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;MonoAndroid90;MonoAndroid10.0;Xamarin.iOS10;</TargetFrameworks>
     <AssemblyName>Plugin.AzurePushNotification</AssemblyName>
     <RootNamespace>Plugin.AzurePushNotification</RootNamespace>
     <PackageId>Plugin.AzurePushNotification</PackageId>
@@ -66,7 +66,6 @@
     <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="28.0.0.3" />
     <PackageReference Include="Xamarin.Azure.NotificationHubs.Android" Version="0.6.0" />
     <PackageReference Include="Xamarin.Firebase.Messaging" Version="71.1740.0" />
-    <PackageReference Include="Xamarin.GooglePlayServices.Basement" Version="71.1620.0" />
     <PackageReference Include="Xamarin.GooglePlayServices.Tasks" Version="71.1601.0" />
     <Compile Include="**\*.android.cs" />
     <Compile Include="**\*.android.*.cs" />
