@@ -604,7 +604,7 @@ namespace Plugin.AzurePushNotification
                 UIApplication.SharedApplication.CancelAllLocalNotifications();
             }
         }
-        public async void RemoveNotification(string tag, int id)
+        public void RemoveNotification(string tag, int id)
         {
             RemoveNotification(id);
         }

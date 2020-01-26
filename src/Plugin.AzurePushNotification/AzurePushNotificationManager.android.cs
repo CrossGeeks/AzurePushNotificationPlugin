@@ -188,7 +188,19 @@ namespace Plugin.AzurePushNotification
         {
             _tokenTcs = new TaskCompletionSource<string>();
             FirebaseInstanceId.Instance.GetInstanceId().AddOnCompleteListener(this);
-            return await _tokenTcs.Task;
+
+            string retVal = null;
+
+            try
+            {
+                retVal = await _tokenTcs.Task;
+            }
+            catch (Exception ex)
+            {
+                _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.RegistrationFailed, $"{ex}"));
+            }
+
+            return retVal;
         }
         public static void Initialize(Context context, string notificationHubConnectionString, string notificationHubPath, NotificationUserCategory[] notificationCategories, bool resetToken, bool createDefaultNotificationChannel = true,bool autoRegistration = true)
         {
@@ -241,8 +253,12 @@ namespace Plugin.AzurePushNotification
             {
                 CrossAzurePushNotification.Current.UnregisterAsync();
             }
-            FirebaseInstanceId.Instance.DeleteInstanceId();
-            Token = string.Empty;
+            else
+            {
+                FirebaseInstanceId.Instance.DeleteInstanceId();
+                Token = string.Empty;
+            }
+           
         }
 
 
@@ -435,6 +451,9 @@ namespace Plugin.AzurePushNotification
                     }
                     finally
                     {
+                        FirebaseInstanceId.Instance.DeleteInstanceId();
+                        Token = string.Empty;
+
                         _tags = new Collection<string>();
                         var editor = Application.Context.GetSharedPreferences(KeyGroupName, FileCreationMode.Private).Edit();
                         editor.PutBoolean(RegisteredKey, false);
@@ -473,8 +492,23 @@ namespace Plugin.AzurePushNotification
 
         public void OnComplete(Android.Gms.Tasks.Task task)
         {
-            string token = task.Result.JavaCast<IInstanceIdResult>().Token;
-            _tokenTcs?.TrySetResult(token);
+            try
+            {
+                if (task.IsSuccessful)
+                {
+                    string token = task.Result.JavaCast<IInstanceIdResult>().Token;
+                    _tokenTcs?.TrySetResult(token);
+                }
+                else
+                {
+                    _tokenTcs?.TrySetException(task.Exception);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _tokenTcs?.TrySetException(ex);
+            }
         }
 
         #region internal methods
