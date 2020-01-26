@@ -12,17 +12,17 @@ namespace Plugin.AzurePushNotification
     {
         public const string DomainTag = "DefaultPushNotificationHandler";
 
-        public void OnError(string error)
+        public virtual void OnError(string error)
         {
             System.Diagnostics.Debug.WriteLine($"{DomainTag} - OnError - {error}");
         }
 
-        public void OnOpened(NotificationResponse response)
+        public virtual void OnOpened(NotificationResponse response)
         {
             System.Diagnostics.Debug.WriteLine($"{DomainTag} - OnOpened");
         }
 
-        public void OnReceived(IDictionary<string, object> parameters)
+        public virtual void OnReceived(IDictionary<string, object> parameters)
         {
             System.Diagnostics.Debug.WriteLine($"{DomainTag} - OnReceived");
         }
