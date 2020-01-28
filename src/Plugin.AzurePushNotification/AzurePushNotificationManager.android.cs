@@ -27,7 +27,6 @@ namespace Plugin.AzurePushNotification
         static string DeviceToken { get; set; }
         static ICollection<string> _tags = Application.Context.GetSharedPreferences(KeyGroupName, FileCreationMode.Private).GetStringSet(TagsKey, new Collection<string>());
         public bool IsRegistered { get { return Application.Context.GetSharedPreferences(KeyGroupName, FileCreationMode.Private).GetBoolean(RegisteredKey, false); } }
-
         public string[] Tags { get { return _tags?.ToArray(); } }
         
         static NotificationResponse delayedNotificationResponse = null;
@@ -142,7 +141,7 @@ namespace Plugin.AzurePushNotification
                         var storedPackageName = prefs.GetString(AzurePushNotificationManager.AppVersionPackageNameKey, string.Empty);
 
 
-                        if (resetToken || (!string.IsNullOrEmpty(storedPackageName) && (!storedPackageName.Equals(packageName, StringComparison.CurrentCultureIgnoreCase) || !storedVersionName.Equals(versionName, StringComparison.CurrentCultureIgnoreCase) || !storedVersionCode.Equals($"{versionCode}", StringComparison.CurrentCultureIgnoreCase))))
+                        if (!CrossAzurePushNotification.Current.IsRegistered || resetToken || (!string.IsNullOrEmpty(storedPackageName) && (!storedPackageName.Equals(packageName, StringComparison.CurrentCultureIgnoreCase) || !storedVersionName.Equals(versionName, StringComparison.CurrentCultureIgnoreCase) || !storedVersionCode.Equals($"{versionCode}", StringComparison.CurrentCultureIgnoreCase))))
                         {
                             ((AzurePushNotificationManager)CrossAzurePushNotification.Current).CleanUp(false);
 
@@ -254,12 +253,10 @@ namespace Plugin.AzurePushNotification
             {
                 CrossAzurePushNotification.Current.UnregisterAsync();
             }
-            else
-            {
-                FirebaseInstanceId.Instance.DeleteInstanceId();
-                Token = string.Empty;
-            }
-           
+
+            FirebaseInstanceId.Instance.DeleteInstanceId();
+            Token = string.Empty;
+
         }
 
 
@@ -452,8 +449,8 @@ namespace Plugin.AzurePushNotification
                     }
                     finally
                     {
-                        FirebaseInstanceId.Instance.DeleteInstanceId();
-                        Token = string.Empty;
+                       // FirebaseInstanceId.Instance.DeleteInstanceId();
+                        //Token = string.Empty;
 
                         _tags = new Collection<string>();
                         var editor = Application.Context.GetSharedPreferences(KeyGroupName, FileCreationMode.Private).Edit();
