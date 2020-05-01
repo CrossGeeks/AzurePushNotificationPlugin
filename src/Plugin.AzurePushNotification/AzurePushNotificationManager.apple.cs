@@ -267,7 +267,7 @@ namespace Plugin.AzurePushNotification
         {
             UIApplication.SharedApplication.UnregisterForRemoteNotifications();
             Token = string.Empty;
-            InternalToken = null;
+            InternalToken = string.Empty;
         }
 
         static void RegisterUserNotificationCategories(NotificationUserCategory[] userCategories)
@@ -563,15 +563,15 @@ namespace Plugin.AzurePushNotification
                     {
                         foreach (var apsVal in aps)
                         {
-                            if (apsVal.Value is NSDictionary)
+                            if (apsVal.Value is NSDictionary apsValDict)
                             {
                                 if (apsVal.Key.Equals(keyAlert))
                                 {
-                                    foreach (var alertVal in apsVal.Value as NSDictionary)
+                                    foreach (var alertVal in apsValDict)
                                     {
-                                        if (alertVal.Value is NSDictionary)
+                                        if (alertVal.Value is NSDictionary valDict)
                                         {
-                                            var value = ((NSDictionary)alertVal.Value).ToJson();
+                                            var value = valDict.ToJson();
                                             parameters.Add($"aps.alert.{alertVal.Key}", value);
                                         }
                                         else
@@ -582,7 +582,7 @@ namespace Plugin.AzurePushNotification
                                 }
                                 else
                                 {
-                                    var value = ((NSDictionary)apsVal.Value).ToJson();
+                                    var value = apsValDict.ToJson();
                                     parameters.Add($"aps.{apsVal.Key}", value);
                                 }
                             }
@@ -593,18 +593,16 @@ namespace Plugin.AzurePushNotification
                         }
                     }
                 }
-                else if (val.Value is NSDictionary)
+                else if (val.Value is NSDictionary valDict)
                 {
-                    var value = ((NSDictionary)val.Value).ToJson();
+                    var value = valDict.ToJson();
                     parameters.Add($"{val.Key}", value);
                 }
                 else
                 {
                     parameters.Add($"{val.Key}", $"{val.Value}");
                 }
-
             }
-
 
             return parameters;
         }
