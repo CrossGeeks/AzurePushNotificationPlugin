@@ -180,7 +180,7 @@ namespace Plugin.AzurePushNotification
         }
         public static void Initialize(string notificationHubConnectionString, string notificationHubPath, NSDictionary options, bool autoRegistration = true, bool enableDelayedResponse = true)
         {
-           
+
             Hub = new SBNotificationHub(notificationHubConnectionString, notificationHubPath);
             TokenKey = new NSString($"{notificationHubPath}_Token");
             PushRegisteredKey = $"{notificationHubPath}_PushRegistered";
@@ -206,7 +206,7 @@ namespace Plugin.AzurePushNotification
 
             if (autoRegistration)
             {
-                 CrossAzurePushNotification.Current.RegisterForPushNotifications();
+                CrossAzurePushNotification.Current.RegisterForPushNotifications();
             }
 
 
@@ -267,7 +267,7 @@ namespace Plugin.AzurePushNotification
         {
             UIApplication.SharedApplication.UnregisterForRemoteNotifications();
             Token = string.Empty;
-            InternalToken = null;
+            InternalToken = string.Empty;
         }
 
         static void RegisterUserNotificationCategories(NotificationUserCategory[] userCategories)
@@ -350,44 +350,44 @@ namespace Plugin.AzurePushNotification
 
             await Task.Run(() =>
             {
-                    NSError errorFirst;
-                    if ((InternalToken != null && InternalToken.Length > 0) && IsRegistered)
+                NSError errorFirst;
+                if ((InternalToken != null && InternalToken.Length > 0) && IsRegistered)
+                {
+                    Hub.UnregisterAll(InternalToken, out errorFirst);
+
+                    if (errorFirst != null)
                     {
-                        Hub.UnregisterAll(InternalToken, out errorFirst);
+                        _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.NotificationHubUnregistrationFailed, errorFirst.Description));
+                        System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Unregister- Error - {errorFirst.Description}");
 
-                        if (errorFirst != null)
-                        {
-                            _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.NotificationHubUnregistrationFailed, errorFirst.Description));
-                            System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Unregister- Error - {errorFirst.Description}");
-
-                            return;
-                        }
+                        return;
                     }
+                }
 
-                    NSSet tagSet = null;
-                    if (tags != null && tags.Length > 0)
-                    {
-                        tagSet = new NSSet(tags);
-                    }
+                NSSet tagSet = null;
+                if (tags != null && tags.Length > 0)
+                {
+                    tagSet = new NSSet(tags);
+                }
 
-                    NSError error;
+                NSError error;
 
-                    Hub.RegisterNative(DeviceToken, tagSet, out error);
+                Hub.RegisterNative(DeviceToken, tagSet, out error);
 
-                    if (error != null)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Register- Error - {error.Description}");
-                        _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.NotificationHubRegistrationFailed, error.Description));
+                if (error != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Register- Error - {error.Description}");
+                    _onNotificationError?.Invoke(CrossAzurePushNotification.Current, new AzurePushNotificationErrorEventArgs(AzurePushNotificationErrorType.NotificationHubRegistrationFailed, error.Description));
 
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Registered - ${_tags}");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Registered - ${_tags}");
 
-                        NSUserDefaults.StandardUserDefaults.SetBool(true, PushRegisteredKey);
-                        NSUserDefaults.StandardUserDefaults.SetValueForKey(_tags ?? new NSArray().MutableCopy(), TagsKey);
-                        NSUserDefaults.StandardUserDefaults.Synchronize();
-                    }
+                    NSUserDefaults.StandardUserDefaults.SetBool(true, PushRegisteredKey);
+                    NSUserDefaults.StandardUserDefaults.SetValueForKey(_tags ?? new NSArray().MutableCopy(), TagsKey);
+                    NSUserDefaults.StandardUserDefaults.Synchronize();
+                }
             });
 
         }
@@ -559,40 +559,54 @@ namespace Plugin.AzurePushNotification
             {
                 if (val.Key.Equals(keyAps))
                 {
-                    NSDictionary aps = data.ValueForKey(keyAps) as NSDictionary;
-
-                    if (aps != null)
+                    if (data.ValueForKey(keyAps) is NSDictionary aps)
                     {
                         foreach (var apsVal in aps)
                         {
-                            if (apsVal.Value is NSDictionary)
+                            if (apsVal.Value is NSDictionary apsValDict)
                             {
                                 if (apsVal.Key.Equals(keyAlert))
                                 {
-                                    foreach (var alertVal in apsVal.Value as NSDictionary)
+                                    foreach (var alertVal in apsValDict)
                                     {
-                                        parameters.Add($"aps.alert.{alertVal.Key}", $"{alertVal.Value}");
+                                        if (alertVal.Value is NSDictionary valDict)
+                                        {
+                                            var value = valDict.ToJson();
+                                            parameters.Add($"aps.alert.{alertVal.Key}", value);
+                                        }
+                                        else
+                                        {
+                                            parameters.Add($"aps.alert.{alertVal.Key}", $"{alertVal.Value}");
+                                        }
                                     }
+                                }
+                                else
+                                {
+                                    var value = apsValDict.ToJson();
+                                    parameters.Add($"aps.{apsVal.Key}", value);
                                 }
                             }
                             else
                             {
                                 parameters.Add($"aps.{apsVal.Key}", $"{apsVal.Value}");
                             }
-
                         }
                     }
+                }
+                else if (val.Value is NSDictionary valDict)
+                {
+                    var value = valDict.ToJson();
+                    parameters.Add($"{val.Key}", value);
                 }
                 else
                 {
                     parameters.Add($"{val.Key}", $"{val.Value}");
                 }
-
             }
-
 
             return parameters;
         }
+
         public void ClearAllNotifications()
         {
             if (UIDevice.CurrentDevice.CheckSystemVersion(10, 0))
@@ -635,5 +649,15 @@ namespace Plugin.AzurePushNotification
             }
         }
 
+    }
+
+    public static class HelperExtensions
+    {
+        public static string ToJson(this NSDictionary dictionary)
+        {
+            var json = NSJsonSerialization.Serialize(dictionary,
+            NSJsonWritingOptions.SortedKeys, out NSError error);
+            return json.ToString(NSStringEncoding.UTF8);
+        }
     }
 }
