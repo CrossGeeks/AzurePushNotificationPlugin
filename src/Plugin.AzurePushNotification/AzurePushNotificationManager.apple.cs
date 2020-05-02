@@ -62,15 +62,24 @@ namespace Plugin.AzurePushNotification
 
         internal static string InternalRetrieveSavedToken()
         {
-            return !string.IsNullOrEmpty(TokenKey)?NSUserDefaults.StandardUserDefaults.StringForKey(TokenKey):null;
+            return !string.IsNullOrEmpty(TokenKey) ? NSUserDefaults.StandardUserDefaults.StringForKey(TokenKey) : string.Empty;
         }
 
         internal static void InternalSaveToken(string token)
         {
-            NSUserDefaults.StandardUserDefaults.SetString(token, TokenKey);
+            if (!string.IsNullOrEmpty(TokenKey))
+            {
+                NSUserDefaults.StandardUserDefaults.SetString(token, TokenKey);
+            }
         }
 
-        public bool IsRegistered { get { return NSUserDefaults.StandardUserDefaults.BoolForKey(PushRegisteredKey); } }
+        public bool IsRegistered
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(PushRegisteredKey) ? NSUserDefaults.StandardUserDefaults.BoolForKey(PushRegisteredKey) : false;
+            }
+        }
 
         public bool IsEnabled { get { return UIApplication.SharedApplication.IsRegisteredForRemoteNotifications; } }
 
@@ -82,7 +91,7 @@ namespace Plugin.AzurePushNotification
         {
             get
             {
-                return !string.IsNullOrEmpty(TokenKey) ? (NSUserDefaults.StandardUserDefaults.ValueForKey(TokenKey) as NSData):null;
+                return !string.IsNullOrEmpty(TokenKey) ? (NSUserDefaults.StandardUserDefaults.ValueForKey(TokenKey) as NSData) : string.Empty;
             }
             set
             {
@@ -383,8 +392,10 @@ namespace Plugin.AzurePushNotification
                 else
                 {
                     System.Diagnostics.Debug.WriteLine($"AzurePushNotification - Registered - ${_tags}");
-
-                    NSUserDefaults.StandardUserDefaults.SetBool(true, PushRegisteredKey);
+                    if (!string.IsNullOrEmpty(PushRegisteredKey))
+                    {
+                        NSUserDefaults.StandardUserDefaults.SetBool(true, PushRegisteredKey);
+                    }
                     NSUserDefaults.StandardUserDefaults.SetValueForKey(_tags ?? new NSArray().MutableCopy(), TagsKey);
                     NSUserDefaults.StandardUserDefaults.Synchronize();
                 }
@@ -414,7 +425,10 @@ namespace Plugin.AzurePushNotification
                     else
                     {
                         _tags = new NSArray().MutableCopy() as NSMutableArray;
-                        NSUserDefaults.StandardUserDefaults.SetBool(false, PushRegisteredKey);
+                        if (!string.IsNullOrEmpty(PushRegisteredKey))
+                        {
+                            NSUserDefaults.StandardUserDefaults.SetBool(false, PushRegisteredKey);
+                        }
                         NSUserDefaults.StandardUserDefaults.SetValueForKey(_tags, TagsKey);
                         NSUserDefaults.StandardUserDefaults.Synchronize();
                     }
@@ -443,12 +457,12 @@ namespace Plugin.AzurePushNotification
             string[] priorityKeys = new string[] { "priority", "aps.priority" };
 
 
-            foreach(var pKey in priorityKeys)
+            foreach (var pKey in priorityKeys)
             {
-                if(parameters.TryGetValue(pKey, out object priority))
+                if (parameters.TryGetValue(pKey, out object priority))
                 {
                     var priorityValue = $"{priority}".ToLower();
-                    switch(priorityValue)
+                    switch (priorityValue)
                     {
                         case "max":
                         case "high":
@@ -602,7 +616,9 @@ namespace Plugin.AzurePushNotification
                 {
                     parameters.Add($"{val.Key}", $"{val.Value}");
                 }
+
             }
+
 
             return parameters;
         }
