@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using System.Text.RegularExpressions;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
@@ -132,7 +132,8 @@ namespace Plugin.AzurePushNotification
 
             Context context = Application.Context;
 
-            int notifyId = 0;
+            var seed = Convert.ToInt32(Regex.Match(Guid.NewGuid().ToString(), @"\d+").Value);
+            int notifyId = new System.Random(seed).Next(000000000, 999999999);
             string title = context.ApplicationInfo.LoadLabel(context.PackageManager);
             var message = string.Empty;
             var tag = string.Empty;
@@ -296,8 +297,9 @@ namespace Plugin.AzurePushNotification
             {
                 resultIntent.SetFlags(AzurePushNotificationManager.NotificationActivityFlags.Value);
             }
+
             int requestCode = new Java.Util.Random().NextInt();
-            var pendingIntent = PendingIntent.GetActivity(context, requestCode, resultIntent,PendingIntentFlags.UpdateCurrent);
+            var pendingIntent = PendingIntent.GetActivity(context, requestCode, resultIntent, PendingIntentFlags.UpdateCurrent);
 
             var chanId = AzurePushNotificationManager.DefaultNotificationChannelId;
             if (parameters.TryGetValue(ChannelIdKey, out object channelId) && channelId != null)
@@ -312,13 +314,13 @@ namespace Plugin.AzurePushNotification
                 .SetAutoCancel(true)
                 .SetContentIntent(pendingIntent);
 
-            if(AzurePushNotificationManager.LargeIconResource != 0)
+            if (AzurePushNotificationManager.LargeIconResource != 0)
             {
                 Bitmap largeIconBitmap = BitmapFactory.DecodeResource(context.Resources, AzurePushNotificationManager.LargeIconResource);
                 notificationBuilder.SetLargeIcon(largeIconBitmap);
             }
-            var deleteIntent = new Intent(context,typeof(PushNotificationDeletedReceiver));
-            var pendingDeleteIntent = PendingIntent.GetBroadcast(context, requestCode, deleteIntent,PendingIntentFlags.CancelCurrent);
+            var deleteIntent = new Intent(context, typeof(PushNotificationDeletedReceiver));
+            var pendingDeleteIntent = PendingIntent.GetBroadcast(context, requestCode, deleteIntent, PendingIntentFlags.CancelCurrent);
             notificationBuilder.SetDeleteIntent(pendingDeleteIntent);
 
             if (Build.VERSION.SdkInt < Android.OS.BuildVersionCodes.O)
@@ -445,7 +447,7 @@ namespace Plugin.AzurePushNotification
                         }
                     }
                 }
-                
+
             }
 
             OnBuildNotification(notificationBuilder, parameters);
