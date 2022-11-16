@@ -297,7 +297,7 @@ namespace Plugin.AzurePushNotification
                 resultIntent.SetFlags(AzurePushNotificationManager.NotificationActivityFlags.Value);
             }
             int requestCode = new Java.Util.Random().NextInt();
-            var pendingIntent = PendingIntent.GetActivity(context, requestCode, resultIntent,PendingIntentFlags.UpdateCurrent);
+            var pendingIntent = PendingIntent.GetActivity(context, requestCode, resultIntent, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
 
             var chanId = AzurePushNotificationManager.DefaultNotificationChannelId;
             if (parameters.TryGetValue(ChannelIdKey, out object channelId) && channelId != null)
@@ -318,7 +318,7 @@ namespace Plugin.AzurePushNotification
                 notificationBuilder.SetLargeIcon(largeIconBitmap);
             }
             var deleteIntent = new Intent(context,typeof(PushNotificationDeletedReceiver));
-            var pendingDeleteIntent = PendingIntent.GetBroadcast(context, requestCode, deleteIntent,PendingIntentFlags.CancelCurrent);
+            var pendingDeleteIntent = PendingIntent.GetBroadcast(context, requestCode, deleteIntent, PendingIntentFlags.CancelCurrent | PendingIntentFlags.Immutable);
             notificationBuilder.SetDeleteIntent(pendingDeleteIntent);
 
             if (Build.VERSION.SdkInt < Android.OS.BuildVersionCodes.O)
@@ -428,7 +428,7 @@ namespace Plugin.AzurePushNotification
 
                                     extras.PutString(ActionIdentifierKey, action.Id);
                                     actionIntent.PutExtras(extras);
-                                    pendingActionIntent = PendingIntent.GetActivity(context, aRequestCode, actionIntent, PendingIntentFlags.UpdateCurrent);
+                                    pendingActionIntent = PendingIntent.GetActivity(context, aRequestCode, actionIntent, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
 
                                 }
                                 else
@@ -436,7 +436,7 @@ namespace Plugin.AzurePushNotification
                                     actionIntent = new Intent(context, typeof(PushNotificationActionReceiver));
                                     extras.PutString(ActionIdentifierKey, action.Id);
                                     actionIntent.PutExtras(extras);
-                                    pendingActionIntent = PendingIntent.GetBroadcast(context, aRequestCode, actionIntent, PendingIntentFlags.UpdateCurrent);
+                                    pendingActionIntent = PendingIntent.GetBroadcast(context, aRequestCode, actionIntent, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
 
                                 }
 

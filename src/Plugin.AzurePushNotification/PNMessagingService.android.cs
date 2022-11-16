@@ -2,13 +2,13 @@
 using System.Linq;
 
 using Android.App;
-using Android.Content;
 using Firebase.Messaging;
 
 namespace Plugin.AzurePushNotification
 {
-    [Service]
+    [Service(Exported = false)]
     [IntentFilter(new[] { "com.google.firebase.MESSAGING_EVENT" })]
+    // ReSharper disable once InconsistentNaming
     public class PNMessagingService : FirebaseMessagingService
     {
         public override void OnMessageReceived(RemoteMessage message)
