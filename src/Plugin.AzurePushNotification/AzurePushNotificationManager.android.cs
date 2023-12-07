@@ -187,7 +187,7 @@ namespace Plugin.AzurePushNotification
         async Task<string> GetTokenAsync()
         {
             _tokenTcs = new TaskCompletionSource<string>();
-            FirebaseInstanceId.Instance.GetInstanceId().AddOnCompleteListener(this);
+            FirebaseMessaging.Instance.GetToken().AddOnCompleteListener(this);
 
             string retVal = null;
 
@@ -254,7 +254,7 @@ namespace Plugin.AzurePushNotification
                 CrossAzurePushNotification.Current.UnregisterAsync();
             }
 
-            FirebaseInstanceId.Instance.DeleteInstanceId();
+            FirebaseMessaging.Instance.DeleteToken();
             Token = string.Empty;
 
         }
@@ -494,7 +494,7 @@ namespace Plugin.AzurePushNotification
             {
                 if (task.IsSuccessful)
                 {
-                    string token = task.Result.JavaCast<IInstanceIdResult>().Token;
+                    var token = task.Result.ToString();
                     _tokenTcs?.TrySetResult(token);
                 }
                 else
