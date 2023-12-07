@@ -1,7 +1,7 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/2.0.41">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;MonoAndroid90;MonoAndroid10.0;Xamarin.iOS10;</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;MonoAndroid10.0;Xamarin.iOS10;</TargetFrameworks>
     <AssemblyName>Plugin.AzurePushNotification</AssemblyName>
     <RootNamespace>Plugin.AzurePushNotification</RootNamespace>
     <PackageId>Plugin.AzurePushNotification</PackageId>
@@ -64,15 +64,15 @@
   <ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
     <PackageReference Include="Xamarin.Android.Support.v4" Version="28.0.0.3" />
     <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="28.0.0.3" />
-    <PackageReference Include="Xamarin.Azure.NotificationHubs.Android" Version="0.6.0" />
-    <PackageReference Include="Xamarin.Firebase.Messaging" Version="71.1740.0" />
-    <PackageReference Include="Xamarin.GooglePlayServices.Tasks" Version="71.1601.0" />
+    <PackageReference Include="Xamarin.Azure.NotificationHubs.Android" Version="1.1.4.1" />
+    <PackageReference Include="Xamarin.Firebase.Messaging" Version="122.0.0" />
+    <PackageReference Include="Xamarin.GooglePlayServices.Tasks" Version="117.2.1" />
     <Compile Include="**\*.android.cs" />
     <Compile Include="**\*.android.*.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
-    <PackageReference Include="Xamarin.Azure.NotificationHubs.iOS" Version="2.0.4" />
+    <PackageReference Include="Xamarin.Azure.NotificationHubs.iOS" Version="3.1.1" />
     <Compile Include="**\*.apple.cs" />
     <Compile Include="**\*.apple.*.cs" />
   </ItemGroup>
